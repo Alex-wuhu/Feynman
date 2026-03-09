@@ -1,6 +1,6 @@
 # Feynman
 
-> "What I cannot create, I do not understand." — Richard Feynman
+> "You learn by asking questions, by thinking, and by experimenting." — Richard Feynman
 
 **Don't read books. Talk to them. Don't pick topics blindly. Let AI build your knowledge system.**
 

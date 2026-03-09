@@ -1353,7 +1353,6 @@ async function init() {
   uploadBtn.addEventListener('click', e => { e.stopPropagation(); togglePopover('home-popover', 'home-popover-book-list', 'home-popover-no-books'); });
   document.getElementById('home-popover-upload').addEventListener('click', () => { closeAllPopovers(); uploadInput.click(); });
   uploadInput.addEventListener('change', () => { if (uploadInput.files.length) { handleFileUpload(uploadInput.files, 'home-upload-status'); uploadInput.value = ''; } });
-  document.getElementById('home-upload-link').addEventListener('click', e => { e.preventDefault(); togglePopover('home-popover', 'home-popover-book-list', 'home-popover-no-books'); });
 
   // Chat page composer
   const chatInput = document.getElementById('chat-input');
