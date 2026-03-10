@@ -12,7 +12,7 @@ Richard Feynman rarely read a book cover to cover — he approached books with q
 
 - **Scout before committing** — quickly understand what a book covers and whether it deserves my full attention.
 - **Build a knowledge scaffold** — when I'm entering an unfamiliar field, it synthesizes key ideas across multiple authoritative works so I can form an initial mental map before diving in.
-- **Go beyond the text** — chat with the author's ideas, surface context that isn't in the book itself, and get insights that bridge multiple sources.
+- **Go beyond the text** — imagine sitting down with the author for a few hours; you'd learn far more than what's on the page. Feynman gives you that experience — because the AI draws on broader knowledge related to the book, every conversation surfaces valuable context and insights you wouldn't get from reading alone.
 
 In short: Feynman helps you read *fewer* books more intentionally, not skip reading altogether.
 
