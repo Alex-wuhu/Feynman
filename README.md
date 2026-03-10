@@ -114,6 +114,8 @@ AI agents simulate these thinkers, faithfully capturing how they reason and argu
 
 - **Reading a book together** — relevant minds join the conversation. Reading "Wealth of Nations"? Adam Smith explains his reasoning while Marx challenges it and Keynes offers a different lens.
 - **Exploring a topic together** — curious about consciousness or moral philosophy? A panel of great minds across eras sits down with you to discuss and debate.
+- **Minds that grow** — these agents aren't static. They accumulate memory from conversations, becoming richer and more nuanced over time while staying faithful to who they are.
+- **A universe of minds** — Feynman ships with ~20 pre-generated great minds across philosophy, science, economics, literature, and more. New minds are generated on-demand whenever you need them.
 
 Like having a study group of the most brilliant people in history, always available to think alongside you. Full design: [`SPEC-great-minds.md`](SPEC-great-minds.md).
 

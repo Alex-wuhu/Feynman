@@ -134,12 +134,55 @@ When a mind's works are indexed as book agents, their responses are grounded in 
 **Cross-validation:**
 For critical claims about a thinker's position, the system can optionally verify via web search grounding (existing Gemini Search Grounding skill).
 
-### 1.6 Updating Mind Agents
+### 1.6 Pre-generated Seed Minds
 
-- Mind agents are **immutable once generated** — their persona doesn't change.
-- If a user reports inaccuracy, the persona can be regenerated with a flag `version` increment.
+To ensure a great first experience, Feynman ships with a set of pre-generated seed minds that are created on first startup. These cover major domains so users always have minds to explore:
+
+| Domain | Seed Minds |
+|--------|------------|
+| Philosophy | Aristotle, Socrates, Nietzsche, Laozi |
+| Science | Richard Feynman, Albert Einstein, Charles Darwin |
+| Economics & Business | Adam Smith, Charlie Munger, Peter Drucker |
+| Literature & Thought | Bertrand Russell, Fyodor Dostoevsky |
+| Technology & Practice | Steve Jobs, Elon Musk |
+| Psychology | Carl Jung, Daniel Kahneman |
+| Politics & History | Niccolò Machiavelli, Winston Churchill |
+
+Approximately 15-20 minds, generated once and cached permanently. Additional minds are generated on-demand as users explore new books and topics.
+
+### 1.7 Memory and Iteration
+
+Mind agents are not static — they accumulate memory over time, making them richer with each conversation.
+
+**Two layers of memory:**
+
+| Layer | Scope | What it captures | When it's used |
+|-------|-------|-----------------|----------------|
+| **Global memory** | Across all users | Key discussion points, frequently debated positions, refined takes on common questions | Appended to the mind's context in every conversation |
+| **User memory** | Per user | What this user has discussed with this mind before, their interests, where the conversation left off | Appended when the same user chats with the same mind again |
+
+**How memory works:**
+
+1. After each conversation, the system extracts a brief summary (2-3 sentences) of the key points discussed.
+2. Global memory entries are stored in a `mind_memories` table and capped (e.g., most recent 50 entries per mind) to keep context windows manageable.
+3. User memory entries are stored with a `user_id` tag (or anonymous session ID for the self-hosted version).
+4. When building the system prompt for a mind, relevant memories are injected as an additional context layer:
+
+```
+Layer 4 (Memory):
+  Global: You have previously discussed {topic_summaries} with various people.
+  User: You last spoke with this person about {previous_discussion}. They were 
+  particularly interested in {interests}.
+```
+
+This means a mind like Charlie Munger gets sharper over time — his responses to questions about mental models become more nuanced as he "accumulates" discussion experience, while still staying grounded in his actual persona and works.
+
+### 1.8 Updating Mind Agents
+
+- Mind agents' **persona is immutable once generated** — their core identity doesn't change.
+- **Memory grows** — their accumulated discussion context evolves with every conversation.
+- If a user reports inaccuracy, the persona can be regenerated with a `version` increment.
 - New works can be linked to existing minds without regenerating the persona.
-- A future "community curation" feature could let users vote on persona accuracy.
 
 ---
 
@@ -260,15 +303,31 @@ For critical claims about a thinker's position, the system can optionally verify
 - When one mind's response references another panelist, the UI shows a subtle "reply" indicator.
 - The system prompt includes awareness of other panelists: *"Other thinkers in this discussion: {names}. You may reference or respond to their positions."*
 
-### 2.4 Where Minds Appear in the UI
+### 2.4 The Minds Page
+
+Minds get a **top-level navigation entry** — equal in prominence to Library, not buried as a tab within it.
+
+The Minds page shows all live mind agents as cards in a grid, similar to the Library's book grid:
+
+- **Avatar** — deterministic visual identity based on `avatar_seed`
+- **Name and era** — e.g., "Aristotle (384–322 BC)"
+- **Domain tags** — e.g., "Philosophy · Logic · Ethics"
+- **Bio summary** — 2-3 sentence description
+- **Works** — linked to book agents in the Library
+- **[Chat →]** — start a direct conversation with this mind
+- **Status indicator** — shows if the mind has accumulated memories (e.g., "42 discussions")
+
+Users can also search/filter minds by domain, and an [+ Add a mind] button allows generating any mind on demand by typing a name.
+
+### 2.5 Where Minds Appear in the UI
 
 | Location | Behavior |
 |----------|----------|
-| **Home page** | New starter: "Discuss philosophy with Aristotle and Nietzsche" |
+| **Home page** | Starter prompts featuring minds: "Discuss philosophy with Aristotle and Nietzsche" |
 | **Global chat** | Perspectives/Round Table panel below Feynman's answer |
 | **Book chat** | Perspectives panel below Feynman's answer (author always included) |
-| **Library** | New "Minds" tab alongside "Books" showing cached mind agents |
-| **Right sidebar** | When minds are active, show panelist list with avatars |
+| **Minds page** | Top-level nav — browse, search, and chat with all live minds |
+| **Right sidebar** | When minds are active in chat, show panelist list with avatars |
 
 ---
 
@@ -291,6 +350,7 @@ CREATE TABLE IF NOT EXISTS minds (
     works TEXT,                   -- JSON array of work titles
     avatar_seed TEXT,
     version INTEGER DEFAULT 1,
+    chat_count INTEGER DEFAULT 0, -- total conversations across all users
     created_at TEXT NOT NULL
 );
 
@@ -307,6 +367,23 @@ CREATE TABLE IF NOT EXISTS mind_works (
     FOREIGN KEY (mind_id) REFERENCES minds(id),
     FOREIGN KEY (agent_id) REFERENCES agents(id)
 );
+```
+
+Memory table for accumulated discussion context:
+
+```sql
+CREATE TABLE IF NOT EXISTS mind_memories (
+    id TEXT PRIMARY KEY,
+    mind_id TEXT NOT NULL,
+    user_id TEXT,                 -- NULL for global memories
+    summary TEXT NOT NULL,        -- 2-3 sentence discussion summary
+    topic TEXT,                   -- topic tag for retrieval
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (mind_id) REFERENCES minds(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_mind_memories_mind ON mind_memories(mind_id);
+CREATE INDEX IF NOT EXISTS idx_mind_memories_user ON mind_memories(mind_id, user_id);
 ```
 
 ### 3.2 New API Endpoints
@@ -421,26 +498,29 @@ The existing `api_global_chat` endpoint is extended: after Feynman's main respon
 
 ## 4. Implementation Phases
 
-### Phase 1: Core Mind Infrastructure
-- `minds` table and CRUD in `db.py`
+### Phase 1: Core Infrastructure & Minds Page
+- `minds`, `mind_works`, `mind_memories` tables and CRUD in `db.py`
 - `minds.py` module: `get_or_create_mind`, `build_mind_system_prompt`, `mind_chat`
 - API endpoints: `/api/minds`, `/api/minds/generate`, `/api/minds/{id}/chat`
-- Basic "Minds" tab in library
+- Pre-generate seed minds on first startup
+- Frontend: top-level Minds page with grid, search, and direct chat
 
-### Phase 2: Book Discussion with Minds (Perspectives Panel)
+### Phase 2: Perspectives Panel (Book + Topic Chat)
 - `/api/minds/suggest` endpoint
+- `/api/minds/panel-chat` endpoint with concurrent LLM calls
 - Integrate perspectives into `api_chat` and `api_global_chat` responses
-- Frontend: Perspectives panel below assistant messages
-- Frontend: Threaded sub-conversation with individual minds
+- Frontend: Perspectives / Round Table panel below assistant messages
+- Frontend: @mention targeting for specific minds
 
-### Phase 3: Topic Exploration with Minds (Round Table)
-- `/api/minds/panel-chat` endpoint
-- Frontend: Round Table panel with multi-mind display
-- Frontend: @mention targeting
-- Frontend: Mind-to-mind awareness in prompts
+### Phase 3: Memory System
+- Post-conversation memory extraction (global + user-level summaries)
+- Memory injection into mind system prompts
+- `chat_count` tracking per mind
+- Frontend: memory indicator on mind cards ("42 discussions")
 
-### Phase 4: Polish & Discovery
-- Mind search/browse in library
-- Starter prompts featuring minds
+### Phase 4: Polish
+- Threaded sub-conversations with individual minds
+- Mind-to-mind awareness in prompts
+- Starter prompts featuring minds on home page
 - Mind avatar generation
-- Mind popularity tracking
+- Mind popularity and domain filtering
