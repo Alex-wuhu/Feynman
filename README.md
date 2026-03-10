@@ -4,7 +4,7 @@
 
 **Read books the way Feynman did. Ask questions, connect ideas across much broader sources than any single book, and let AI help you build a knowledge system.**
 
-**Coming soon: Chat with Great Minds — learn alongside AI agents that simulate great scholars, academics, and practitioners throughout history.**
+**Coming soon: Chat with Great Minds — discuss books and explore topics you care about with AI agents that simulate great scholars, academics, and practitioners.**
 
 ### Why I built this
 
