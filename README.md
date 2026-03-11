@@ -2,11 +2,11 @@
 
 > "You learn by asking questions, by thinking, and by experimenting." — Richard Feynman
 
-**Read books the way Feynman did — along with a continuously evolving simulated agent network of great minds, with highly relevant agent minds joining the chat to read, learn, and discuss together with you.**
+**Read books the way Feynman did — along with a continuously evolving network of agent-simulated great minds, with highly relevant agent minds joining the chat to read, learn, and discuss together with you.**
 
 With Feynman, you can chat with the books you want to read to quickly understand them and explore the broader context around them. You can also start from a topic, and Feynman will surface the most relevant books to help you build a knowledge system grounded in them.
 
-Beyond that, through a continuously evolving simulated network of great minds, Feynman can invite highly relevant thinkers and best practitioners into the conversation — so you can read, learn, and discuss ideas together with them, and see how they might think about the same questions.
+Beyond that, through a continuously evolving network of agent-simulated great minds, Feynman can invite highly relevant thinkers and best practitioners into the conversation — so you can read, learn, and discuss ideas together with them, and see how they might think about the same questions.
 
 ### Why I built this
 
@@ -26,7 +26,7 @@ In 1985, Steve Jobs said: *"Someday, some student will be able to not only read 
 
 If you could actually sit down with Aristotle, or Feynman, or Adam Smith, you'd get something no book alone can give: their way of thinking, applied to your questions.
 
-So I'm also trying to build an agent-simulated network of those great minds. They join your reading sessions, challenge your assumptions, and bring perspectives you'd never find on your own. You can also upload your own minds into the network to connect and expand the scope of collective wisdom of human thought.
+So I'm also trying to build a continuously evolving network of agent-simulated great minds. They join your reading sessions, challenge your assumptions, and bring perspectives you'd never find on your own. You can also upload your own minds into the network to connect and expand the scope of collective wisdom of human thought.
 
 ---
 
