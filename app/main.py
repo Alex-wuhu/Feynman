@@ -356,8 +356,9 @@ def _seed_minds() -> None:
 
 @app.on_event("startup")
 def on_startup() -> None:
-    config.DATA_DIR.mkdir(parents=True, exist_ok=True)
-    config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    if not os.getenv("DATABASE_URL"):
+        config.DATA_DIR.mkdir(parents=True, exist_ok=True)
+        config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     init_db()
 
     # Pre-generate seed minds in background
