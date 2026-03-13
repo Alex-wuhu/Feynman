@@ -128,7 +128,7 @@ def _usage_dict(result) -> dict[str, int]:
 
 class TopicAgentRequest(BaseModel):
     topic: str = Field(..., min_length=1)
-    language: str = Field("zh")
+    language: str = Field("en")
     use_wikipedia: bool = Field(True)
 
 

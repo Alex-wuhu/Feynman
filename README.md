@@ -2,11 +2,15 @@
 
 > "You learn by asking questions, by thinking, and by experimenting." — Richard Feynman
 
-**Read books the way Feynman did — along with a continuously evolving network of agent-simulated great minds, with highly relevant agent minds joining the chat to read, learn, and discuss together with you.**
+**Chat with books. Great minds will join in. Everything grows as you explore.**
 
-With Feynman, you can chat with the books you want to read to quickly understand them and explore the broader context around them. You can also start from a topic, and Feynman will surface the most relevant books to help you build a knowledge system grounded in them.
+With Feynman, you can chat with the books you want to read to quickly understand them and explore the broader context around them. You can also start from a topic, and Feynman will surface the most relevant books to help you build a knowledge system grounded in them. As you chat, a continuously evolving network of agent-simulated great minds — scholars, scientists, practitioners — automatically join the conversation, so you read, learn, and discuss ideas together with the most relevant thinkers.
 
-Beyond that, through a continuously evolving network of agent-simulated great minds, Feynman can invite highly relevant thinkers and best practitioners into the conversation — so you can read, learn, and discuss ideas together with them, and see how they might think about the same questions.
+Three things grow with every conversation:
+
+- **Your knowledge goes beyond the page** — a four-layer content system (RAG → Content Fetch → Web Search → LLM Knowledge) means answers draw on the book's text, metadata from Open Library/Google Books/Wikipedia, real-time web results, and the model's own training — not just what's printed on the page.
+- **Your library grows as you chat** — there's no static catalog. Books are discovered through topic exploration, search, chat mentions, uploads, and community voting. The library is a living thing that expands with every conversation.
+- **The minds network evolves with you** — great minds accumulate memory from conversations, becoming richer and more nuanced over time. You can upload your own minds — or anyone you admire — from a Twitter profile, blog, or text to connect and expand the scope of the network's collective wisdom.
 
 ### Why I built this
 
@@ -32,17 +36,17 @@ So I'm also trying to build a continuously evolving network of agent-simulated g
 
 Feynman is a Socratic study companion powered by AcademiAI. It does three things:
 
-**1. Turn any book into a conversation** — Ask questions and get answers grounded in the book's actual content, with every claim traced back to a specific passage. But it doesn't stop at the text — the AI brings in broader context and related knowledge, so you learn more than the book alone could teach you.
+**1. Turn any book into a conversation** — Ask questions and get answers grounded in the book's actual content, with every claim traced back to a specific passage. But it doesn't stop at the text — a four-layer content system (RAG, Content Fetch, Web Search, LLM Knowledge) brings in broader context and related knowledge, so you learn more than the book alone could teach you.
 
-**2. Turn any topic into a knowledge system** — Curious about microeconomics but don't know where to start? Feynman discovers the right books, generates the questions you should be asking, and teaches you through conversation — all grounded in real sources, enriched by knowledge that goes beyond any single book.
+**2. Turn any topic into a knowledge system** — Curious about microeconomics but don't know where to start? Feynman discovers the right books, generates the questions you should be asking, and teaches you through conversation — all grounded in real sources, enriched by knowledge that goes beyond any single book. Your library grows organically as you explore: every search, chat mention, and topic click adds new books to it.
 
-**3. Read and discuss with great minds** — As you chat, Feynman automatically invites highly relevant great minds — scholars, scientists, practitioners — to join the conversation as AI agents. You can also invite specific minds yourself, discover new ones through the knowledge graph, or upload your own (via a Twitter profile, blog URL, or text) to expand the network. The network continuously evolves: the more you explore, the richer it becomes.
+**3. Read and discuss with an evolving network of great minds** — As you chat, Feynman automatically invites highly relevant great minds — scholars, scientists, practitioners — to join the conversation as AI agents. These minds aren't static: they accumulate memory from conversations, becoming richer over time. You can also invite specific minds yourself, discover new ones through the knowledge graph, or upload your own (via a Twitter profile, blog URL, or text) to connect and expand the network. The more you explore, the richer it becomes.
 
 ---
 
 ## Chat With Books
 
-Have a book but don't want to read all 300 pages? Chat with it instead. Ask anything and get answers backed by a multi-layered skill system:
+Have a book but don't want to read all 300 pages? Chat with it instead. Ask anything and get answers backed by a four-layer content system — so you always learn more than what's on the page:
 
 | Priority | Skill | What it does |
 |----------|-------|-------------|
@@ -57,7 +61,7 @@ Select multiple books and ask questions across all of them — Feynman searches 
 
 ## Topic-Driven Knowledge Building
 
-Don't have a book? Start with a topic.
+Don't have a book? Start with a topic. Your library grows as you chat — there's no static catalog to browse.
 
 Pick an interest — Psychology, Philosophy, Economics, Physics, or anything — and Feynman:
 1. **Discovers the right books** via LLM curation (no predefined catalog)
@@ -65,22 +69,22 @@ Pick an interest — Psychology, Philosophy, Economics, Physics, or anything —
 3. **Answers your questions** grounded in the discovered books' content
 4. **Grows your library organically** as you explore deeper
 
-Your library also expands through search, chat mentions, PDF/TXT uploads, and community voting (books with enough upvotes get auto-indexed).
+Your library also expands through search, chat mentions, PDF/TXT uploads, and community voting (books with enough upvotes get auto-indexed). Every conversation makes it richer.
 
 ## Chat with Great Minds
 
-Chat with books is just the starting point. You can also chat and learn with great minds — scholars, academics, and great practitioners across every field.
+Chat with books is just the starting point. You can also chat and learn with a continuously evolving network of great minds — scholars, academics, and great practitioners across every field.
 
 AI agents simulate these thinkers, faithfully capturing how they reason and argue, grounded in their actual works. When you chat about a book or explore a topic, relevant minds automatically join the conversation — and you see exactly who joined with a "X joined the discussion" notification, just like a group chat.
 
 - **Minds join your conversations** — when you chat about a book or topic, relevant minds are automatically invited. Reading "Wealth of Nations"? Adam Smith explains his reasoning while Marx challenges it and Keynes offers a different lens. Their replies appear as individual messages in the conversation timeline, not hidden in a sidebar.
 - **Continuity across turns** — once a mind joins, they stay in the conversation and see the full chat history. As the topic shifts, new minds join automatically with a notification, while existing ones continue to participate.
+- **A network that evolves** — these agents aren't static. They accumulate memory from conversations, becoming richer and more nuanced over time while staying faithful to who they are. The network grows with every interaction.
+- **Upload your own minds** — create a mind agent from a Twitter profile, blog URL, or pasted text. Upload yourself, people you admire, or anyone whose thinking you want in the network — and connect them to the existing web of great minds.
 - **Knowledge graph** — the Great Minds page features an interactive force-directed network visualization. Minds cluster by domain, and you can discover new related minds by clicking "Discover nearby minds" on any node. New minds appear with a highlighted badge and the view auto-pans to show them.
-- **Invite or create minds** — manually invite specific minds to join a chat via the composer, or create your own mind agent from a Twitter profile, blog URL, or pasted text.
-- **Minds that grow** — these agents aren't static. They accumulate memory from conversations, becoming richer and more nuanced over time while staying faithful to who they are.
 - **50+ pre-generated minds** — Feynman ships with minds across philosophy, physics, economics, psychology, literature, tech, startups, and more — from Aristotle and Feynman to Marc Andreessen and Naval Ravikant. New minds are generated on-demand whenever you need them.
 
-Like having a study group of the most brilliant people in history, always available to think alongside you.
+Like having a study group of the most brilliant people in history — one that grows smarter every time you use it.
 
 ## Token Usage Transparency
 

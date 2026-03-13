@@ -60,7 +60,7 @@ async function initSupabase() {
       userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || userName;
       localStorage.setItem('userName', userName);
     }
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
       if (session) {
         currentUser = session.user;
         authToken = session.access_token;
@@ -71,6 +71,10 @@ async function initSupabase() {
         authToken = null;
       }
       updateAuthUI();
+      if (event === 'SIGNED_IN' && (window.location.hash === '' || window.location.hash === '#' || window.location.hash === '#/' || window.location.hash === '#/login' || window.location.hash === '#/landing')) {
+        window.location.hash = '#/';
+        navigate();
+      }
     });
   } catch (e) { console.warn('Supabase init failed:', e); }
 }
@@ -84,7 +88,7 @@ function updateAuthUI() {
     ? `<a href="#/subscription" class="sidebar-profile-row" title="Manage subscription">
         <div class="profile-avatar">
           ${currentUser.user_metadata?.avatar_url
-            ? `<img src="${esc(currentUser.user_metadata.avatar_url)}" style="width:28px;height:28px;border-radius:50%" />`
+            ? `<img src="${currentUser.user_metadata.avatar_url}" referrerpolicy="no-referrer" style="width:28px;height:28px;border-radius:50%" />`
             : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
           }
         </div>
@@ -176,36 +180,112 @@ function renderLoginPage() {
   const el = document.getElementById('page-login');
   if (!el) return;
   el.innerHTML = `
-    <div class="home-center" style="max-width:400px">
-      <div class="greeting-row" style="justify-content:center;margin-bottom:24px">
-        <svg class="greeting-logo" width="40" height="40" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-          <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/><rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
-          <rect x="8" y="8" width="40" height="28" fill="#DA7756"/><rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
-          <rect x="16" y="16" width="8" height="8" fill="#2D3436"/><rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
-          <rect x="18" y="18" width="4" height="4" fill="#fff"/><rect x="34" y="18" width="4" height="4" fill="#fff"/>
-          <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/><rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
-          <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
-        </svg>
-        <h1 class="greeting">Welcome to Feynman</h1>
-      </div>
-      <p style="text-align:center;color:var(--text-muted);margin-bottom:32px;font-size:14px">Sign in to save your progress and unlock Pro features</p>
-      <form id="auth-form" class="auth-email-form" onsubmit="return false">
-        <input id="auth-email" class="onboarding-input" type="email" placeholder="Email" required autocomplete="email" />
-        <input id="auth-password" class="onboarding-input" type="password" placeholder="Password" required autocomplete="current-password" minlength="6" />
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-brand">
+          <svg width="40" height="40" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+            <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/><rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
+            <rect x="8" y="8" width="40" height="28" fill="#DA7756"/><rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
+            <rect x="16" y="16" width="8" height="8" fill="#2D3436"/><rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
+            <rect x="18" y="18" width="4" height="4" fill="#fff"/><rect x="34" y="18" width="4" height="4" fill="#fff"/>
+            <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/><rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
+            <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
+          </svg>
+        </div>
+        <h1 class="login-welcome">Welcome to <span class="login-welcome-brand">Feynman</span></h1>
+        <p class="login-subtitle">Your AI-powered learning companion</p>
+        <button id="google-signin-btn" class="login-google" type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
         <div id="auth-error" class="auth-error"></div>
         <div id="auth-success" class="auth-success"></div>
-        <button id="auth-submit-btn" class="onboarding-btn auth-submit-btn" type="submit">Sign in</button>
-        <p class="auth-toggle-text"><span id="auth-toggle-label">Don't have an account?</span> <a href="javascript:void(0)" id="auth-toggle-link">Sign up</a></p>
-      </form>
-      <p style="text-align:center;color:var(--text-muted);margin-top:16px;font-size:12px"><a href="#/" style="color:var(--text-muted);text-decoration:underline">Continue without account</a></p>
+        <div class="login-divider"><span>or sign in with email</span></div>
+        <div id="email-section" class="login-email-section">
+          <form id="auth-form" class="login-form" onsubmit="return false">
+            <div class="login-field">
+              <input id="auth-email" class="login-input" type="email" placeholder="Email address" required autocomplete="email" />
+            </div>
+            <div class="login-field">
+              <input id="auth-password" class="login-input" type="password" placeholder="Password" required autocomplete="current-password" minlength="6" />
+            </div>
+            <button id="auth-submit-btn" class="login-submit login-submit-secondary" type="submit">Sign in</button>
+          </form>
+          <p class="login-toggle"><span id="auth-toggle-label">Don't have an account?</span> <a href="javascript:void(0)" id="auth-toggle-link">Sign up</a></p>
+        </div>
+      </div>
+      <a href="#/landing" class="login-back">&larr; Back</a>
     </div>`;
   let isSignUp = false;
   const form = el.querySelector('#auth-form'), emailInput = el.querySelector('#auth-email'), passwordInput = el.querySelector('#auth-password');
   const submitBtn = el.querySelector('#auth-submit-btn'), toggleLink = el.querySelector('#auth-toggle-link'), toggleLabel = el.querySelector('#auth-toggle-label');
+  const emailSection = el.querySelector('#email-section');
   const errorEl = el.querySelector('#auth-error'), successEl = el.querySelector('#auth-success');
-  function updateMode() { submitBtn.textContent = isSignUp ? 'Sign up' : 'Sign in'; toggleLabel.textContent = isSignUp ? 'Already have an account?' : "Don't have an account?"; toggleLink.textContent = isSignUp ? 'Sign in' : 'Sign up'; passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password'; errorEl.textContent = ''; successEl.textContent = ''; }
-  toggleLink.addEventListener('click', () => { isSignUp = !isSignUp; updateMode(); });
-  form.addEventListener('submit', async (e) => { e.preventDefault(); const email = emailInput.value.trim(), password = passwordInput.value; if (!email || !password) return; errorEl.textContent = ''; successEl.textContent = ''; submitBtn.disabled = true; submitBtn.textContent = isSignUp ? 'Signing up...' : 'Signing in...'; try { if (isSignUp) { await signUpWithEmail(email, password); successEl.textContent = 'Check your email to confirm your account, then sign in.'; isSignUp = false; updateMode(); } else { await signInWithEmail(email, password); } } catch (err) { errorEl.textContent = err.message || 'Something went wrong'; } finally { submitBtn.disabled = false; updateMode(); } });
+  const divider = el.querySelector('.login-divider');
+
+  function updateMode() {
+    submitBtn.textContent = isSignUp ? 'Create account' : 'Sign in';
+    toggleLabel.textContent = isSignUp ? 'Already have an account?' : "Don't have an account?";
+    toggleLink.textContent = isSignUp ? 'Sign in' : 'Sign up';
+    passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
+    errorEl.textContent = ''; successEl.textContent = '';
+  }
+
+  divider.style.cursor = 'pointer';
+  divider.addEventListener('click', () => {
+    emailSection.classList.toggle('login-email-collapsed');
+    if (!emailSection.classList.contains('login-email-collapsed')) {
+      emailInput.focus();
+    }
+  });
+
+  toggleLink.addEventListener('click', () => {
+    isSignUp = !isSignUp;
+    updateMode();
+    emailSection.classList.remove('login-email-collapsed');
+  });
+
+  const googleBtn = el.querySelector('#google-signin-btn');
+  googleBtn.addEventListener('click', async () => {
+    if (!supabaseClient) {
+      errorEl.textContent = 'Authentication is not configured. Please set up Supabase credentials.';
+      return;
+    }
+    errorEl.textContent = '';
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+    if (error) errorEl.textContent = error.message;
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim(), password = passwordInput.value;
+    if (!email || !password) return;
+    if (!supabaseClient) {
+      errorEl.textContent = 'Authentication is not configured. Please set up Supabase credentials.';
+      return;
+    }
+    errorEl.textContent = ''; successEl.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+    try {
+      if (isSignUp) {
+        await signUpWithEmail(email, password);
+        successEl.textContent = 'Check your email to confirm your account, then sign in.';
+        isSignUp = false;
+        updateMode();
+      } else {
+        await signInWithEmail(email, password);
+      }
+    } catch (err) {
+      errorEl.textContent = err.message || 'Something went wrong';
+    } finally {
+      submitBtn.disabled = false;
+      updateMode();
+    }
+  });
 }
 
 function renderSubscriptionPage() {
@@ -411,8 +491,8 @@ function renderLandingPage() {
 
         <div class="lp-fg-center">
           <div class="lp-hero-left">
-            <h1 class="lp-hero-headline">Chat with books,<br>great minds<br>will join in.</h1>
-            <p class="lp-hero-sub">Read the way Feynman did — turn any book into a conversation, explore beyond what's on the page, or start from a topic to discover the right books and build a knowledge system. Relevant great minds join in along the way.</p>
+            <h1 class="lp-hero-headline">Chat with books.<br>Great minds join in.<br>Everything grows.</h1>
+            <p class="lp-hero-sub">Turn any book into a conversation that goes beyond the page. Start from a topic and watch your library grow. An evolving network of great minds joins in — and keeps getting smarter the more you explore.</p>
           </div>
           <div class="lp-chat-card">
             <div class="lp-chat-home" id="lp-chat-home">

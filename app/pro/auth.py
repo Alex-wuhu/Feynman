@@ -23,6 +23,7 @@ PUBLIC_PATHS = {
     "/api/agents",
     "/api/votes",
     "/api/minds",
+    "/favicon.ico",
 }
 PUBLIC_PREFIXES = ("/static/",)
 

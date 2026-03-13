@@ -527,26 +527,122 @@ body {
 .onboarding-btn:hover { opacity: 0.85; }
 .onboarding-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.auth-email-form {
-  display: flex; flex-direction: column; gap: 12px; align-items: center;
+/* ─── Login / Sign-up Page ─── */
+.login-page {
+  background: var(--bg-home); flex: 1;
 }
-.auth-email-form .onboarding-input { width: 280px; box-sizing: border-box; }
-.auth-submit-btn { width: 280px; margin-top: 8px; }
+.login-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100%; padding: 40px 20px;
+}
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--bg-chat);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 48px 36px 36px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.08);
+}
+.login-brand {
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+}
+.login-welcome {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 24px; font-weight: 400; text-align: center;
+  color: var(--text); margin: 0 0 6px; line-height: 1.3;
+}
+.login-welcome-brand { font-weight: 700; }
+.login-subtitle {
+  font-size: 14px; color: var(--text-muted); text-align: center;
+  margin: 0 0 32px; font-weight: 400;
+}
+.login-google {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; padding: 13px 20px;
+  border: 1px solid var(--border-strong, #d1d5db); border-radius: 12px;
+  background: #fff; color: #3c4043;
+  font-size: 15px; font-weight: 500; font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.login-google:hover {
+  background: #f8f9fa;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.login-google svg { flex-shrink: 0; }
 .auth-error {
   color: var(--delete-color); font-size: 13px; text-align: center;
-  min-height: 0; max-width: 280px; word-break: break-word;
+  min-height: 0; word-break: break-word; margin-top: 12px;
 }
 .auth-success {
   color: var(--card-badge-ready-color); font-size: 13px; text-align: center;
-  min-height: 0; max-width: 280px; word-break: break-word;
+  min-height: 0; word-break: break-word; margin-top: 12px;
 }
-.auth-toggle-text {
-  font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 4px;
+.login-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 24px 0 4px; color: var(--text-muted); font-size: 12px;
+  user-select: none;
 }
-.auth-toggle-text a {
-  color: var(--text); font-weight: 600; text-decoration: none; margin-left: 4px;
+.login-divider:hover { color: var(--text-secondary); }
+.login-divider::before, .login-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border, #d1d5db);
 }
-.auth-toggle-text a:hover { text-decoration: underline; }
+.login-email-section {
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+  max-height: 400px; opacity: 1;
+}
+.login-email-collapsed {
+  max-height: 0; opacity: 0;
+}
+.login-form {
+  display: flex; flex-direction: column; gap: 12px;
+  padding-top: 16px;
+}
+.login-field { display: flex; flex-direction: column; }
+.login-input {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  border: 1px solid var(--border-strong); background: var(--bg-chat);
+  font-size: 14px; font-family: inherit; color: var(--text);
+  outline: none; box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.login-input:focus {
+  border-color: rgba(0,113,227,0.5);
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.1);
+}
+.login-input::placeholder { color: var(--text-muted); }
+.login-submit {
+  width: 100%; padding: 11px 0; border-radius: 10px; border: none;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; margin-top: 4px;
+  transition: opacity 0.15s;
+}
+.login-submit-secondary {
+  background: var(--bg-hover, #f3f4f6);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.login-submit-secondary:hover { opacity: 0.8; }
+.login-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-toggle {
+  font-size: 13px; color: var(--text-muted); text-align: center;
+  margin: 14px 0 0;
+}
+.login-toggle a {
+  color: var(--accent, #0071e3); font-weight: 600;
+  text-decoration: none; margin-left: 4px;
+}
+.login-toggle a:hover { text-decoration: underline; }
+.login-back {
+  margin-top: 24px; font-size: 13px;
+  color: var(--text-muted); text-decoration: none;
+  transition: color 0.15s;
+}
+.login-back:hover { color: var(--text); }
 
 .onboarding-topics {
   display: flex; flex-wrap: wrap; gap: 8px;
