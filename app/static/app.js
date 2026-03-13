@@ -325,7 +325,7 @@ function renderSubscriptionPage() {
       'Discover more books in chat & library',
       'Great minds continuously join chats',
       'Invite & chat one-on-one with minds',
-      'Invite famous thinkers by name',
+      'Invite great minds by name',
       'Create minds from any source',
       'Discover & expand the minds network',
       'Higher daily usage limits',
@@ -353,7 +353,7 @@ function renderSubscriptionPage() {
           <div class="sub-card-head">
             <div class="sub-plan-name"><span>Pro</span>${isPro ? '<span class="sub-badge sub-badge-pro">Current</span>' : ''}</div>
             <div class="sub-price">$9.90<span>/mo</span></div>
-            <p class="sub-price-note">For power users who read every day</p>
+            <p class="sub-price-note">For power users who read and learn every day</p>
           </div>
           <div class="sub-card-body">
             ${proFeatures.map(f => featureRow(f, true)).join('')}
