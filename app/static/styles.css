@@ -216,7 +216,7 @@ body {
 .app-layout.sidebar-collapsed .sidebar-minds-link {
   justify-content: center; padding: 8px; margin: 0 8px 4px;
 }
-.app-layout.sidebar-collapsed .sidebar-profile-row .sidebar-label {
+.app-layout.sidebar-collapsed .sidebar-profile .sidebar-label {
   display: none;
 }
 .app-layout.sidebar-collapsed .sidebar-history { display: none; }
@@ -351,17 +351,64 @@ body {
   padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
 }
-.sidebar-profile {
-  display: flex; align-items: center;
+.sidebar-user-wrap {
+  position: relative;
 }
+.sidebar-profile {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; padding: 4px; border-radius: 10px;
+  transition: background 0.15s;
+}
+.sidebar-profile:hover { background: rgba(128,128,128,0.08); }
 .profile-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   background: var(--border-strong);
   display: flex; align-items: center; justify-content: center;
   color: var(--text-muted); cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s; flex-shrink: 0;
 }
 .profile-avatar:hover { background: rgba(128,128,128,0.2); }
+
+/* User popup menu */
+.sidebar-user-menu {
+  display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
+  min-width: 220px; background: var(--bg-chat);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.18));
+  z-index: 100; padding: 6px;
+  animation: userMenuIn 0.15s ease-out;
+}
+.sidebar-user-menu.open { display: block; }
+@keyframes userMenuIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.user-menu-header {
+  padding: 10px 12px 8px; display: flex; flex-direction: column; gap: 2px;
+}
+.user-menu-name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-menu-email {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-menu-divider {
+  height: 1px; background: var(--border); margin: 4px 8px;
+}
+.user-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 8px;
+  font-size: 13px; color: var(--text); text-decoration: none;
+  cursor: pointer; transition: background 0.12s;
+  background: none; border: none; width: 100%; text-align: left;
+  font-family: inherit;
+}
+.user-menu-item:hover { background: rgba(128,128,128,0.08); }
+.user-menu-item svg { flex-shrink: 0; color: var(--text-muted); }
+.user-menu-signout { color: var(--delete-color, #ef4444); }
+.user-menu-signout svg { color: var(--delete-color, #ef4444); }
 
 /* Floating sidebar button (mobile only when collapsed) */
 .sidebar-float-btn {
@@ -1966,6 +2013,7 @@ body {
 .lp-hero-left {
   flex: 0 0 auto;
   min-width: 340px;
+  max-width: 380px;
   position: relative;
   z-index: 1;
 }
