@@ -491,8 +491,8 @@ function renderLandingPage() {
 
         <div class="lp-fg-center">
           <div class="lp-hero-left">
-            <h1 class="lp-hero-headline">Chat with books.<br>Great minds join in.<br>Everything grows.</h1>
-            <p class="lp-hero-sub">Turn any book into a conversation that goes beyond the page. Start from a topic and watch your library grow. An evolving network of great minds joins in — and keeps getting smarter the more you explore.</p>
+            <h1 class="lp-hero-headline">Chat with books.<br>Great minds join in.</h1>
+            <p class="lp-hero-sub">Turn any book into a conversation that goes beyond the page, or start from a topic to learn across all relevant books with a library that auto-grows as books are mentioned. An evolving network of agent-simulated great minds joins the discussion along the way.</p>
           </div>
           <div class="lp-chat-card">
             <div class="lp-chat-home" id="lp-chat-home">
