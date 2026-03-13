@@ -1,5 +1,12 @@
 /* ─── Feynman — Learn by asking questions ─── */
 
+function _isDarkMode() {
+  const el = document.documentElement;
+  if (el.classList.contains('dark')) return true;
+  if (el.classList.contains('light')) return false;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 // ─── State ───
 let agents = [];
 let votes = [];
@@ -238,6 +245,7 @@ function getRoute() {
   if (hash === '#/landing') return { page: 'landing' };
   if (hash === '#/' || hash === '#') {
     if (!currentUser && window.FEYNMAN_PRO) return { page: 'landing' };
+    if (!window.FEYNMAN_PRO && !localStorage.getItem('feynman-landed')) return { page: 'landing' };
     return { page: 'home' };
   }
   if (hash === '#/chat') return { page: 'chat' };
@@ -254,24 +262,63 @@ function getRoute() {
 }
 
 // ─── Landing Page ───
+const _LP_COLORS = ['#6d597a','#355070','#264653','#2a9d8f','#e76f51','#b56576','#0077b6','#588157','#9b2226','#457b9d'];
+function _lpColor(name) { let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0; return _LP_COLORS[Math.abs(h) % _LP_COLORS.length]; }
+
 const LP_MINDS = [
-  { name: 'Richard Feynman', domain: 'physics', color: '#e76f51' },
-  { name: 'Aristotle', domain: 'philosophy', color: '#264653' },
-  { name: 'Marie Curie', domain: 'science', color: '#2a9d8f' },
-  { name: 'Ada Lovelace', domain: 'computing', color: '#6d597a' },
-  { name: 'Elon Musk', domain: 'engineering, business', color: '#0077b6' },
-  { name: 'Steve Jobs', domain: 'design, business', color: '#355070' },
-  { name: 'Albert Einstein', domain: 'physics', color: '#457b9d' },
-  { name: 'Socrates', domain: 'philosophy', color: '#264653' },
-  { name: 'Charlie Munger', domain: 'investing, psychology', color: '#9b2226' },
-  { name: 'Leonardo da Vinci', domain: 'art, science', color: '#b56576' },
-  { name: 'Nikola Tesla', domain: 'engineering', color: '#0077b6' },
-  { name: 'Paul Graham', domain: 'startups, writing', color: '#588157' },
-  { name: 'Alan Turing', domain: 'computing', color: '#264653' },
-  { name: 'Nassim Taleb', domain: 'risk, philosophy', color: '#9b2226' },
-  { name: 'Charles Darwin', domain: 'biology, science', color: '#588157' },
-  { name: 'Ray Dalio', domain: 'investing, systems', color: '#355070' },
-];
+  { name: 'Aristotle', domain: 'ancient philosophy, logic, ethics, metaphysics, rhetoric' },
+  { name: 'Socrates', domain: 'ancient philosophy, ethics, epistemology, dialectic' },
+  { name: 'Plato', domain: 'ancient philosophy, metaphysics, political theory, epistemology' },
+  { name: 'Marcus Aurelius', domain: 'stoicism, ancient philosophy, ethics, leadership' },
+  { name: 'Confucius', domain: 'eastern philosophy, ethics, governance, education' },
+  { name: 'Laozi', domain: 'eastern philosophy, Taoism, metaphysics' },
+  { name: 'Sun Tzu', domain: 'eastern philosophy, military strategy, leadership, game theory' },
+  { name: 'Friedrich Nietzsche', domain: 'modern philosophy, existentialism, ethics, cultural criticism' },
+  { name: 'Niccolò Machiavelli', domain: 'political philosophy, statecraft, power, realism' },
+  { name: 'Bertrand Russell', domain: 'analytic philosophy, logic, mathematics, social criticism' },
+  { name: 'Michel Foucault', domain: 'modern philosophy, power, social theory, knowledge systems' },
+  { name: 'Immanuel Kant', domain: 'modern philosophy, epistemology, ethics, metaphysics' },
+  { name: 'Richard Feynman', domain: 'physics, quantum mechanics, science education' },
+  { name: 'Albert Einstein', domain: 'physics, relativity, philosophy of science' },
+  { name: 'Isaac Newton', domain: 'physics, mathematics, classical mechanics, optics' },
+  { name: 'Nikola Tesla', domain: 'physics, electrical engineering, invention' },
+  { name: 'Stephen Hawking', domain: 'physics, cosmology, science communication' },
+  { name: 'John von Neumann', domain: 'mathematics, computer science, game theory, quantum mechanics' },
+  { name: 'Charles Darwin', domain: 'biology, evolution, natural history' },
+  { name: 'E.O. Wilson', domain: 'biology, sociobiology, ecology, biodiversity' },
+  { name: 'Adam Smith', domain: 'economics, free markets, moral philosophy' },
+  { name: 'John Maynard Keynes', domain: 'economics, macroeconomics, fiscal policy' },
+  { name: 'Charlie Munger', domain: 'investing, mental models, multidisciplinary thinking' },
+  { name: 'Warren Buffett', domain: 'investing, value investing, business analysis' },
+  { name: 'Ray Dalio', domain: 'investing, macroeconomics, principles, systems thinking' },
+  { name: 'Daniel Kahneman', domain: 'cognitive psychology, behavioral economics, decision-making' },
+  { name: 'Carl Jung', domain: 'depth psychology, psychoanalysis, mythology, archetypes' },
+  { name: 'Sigmund Freud', domain: 'depth psychology, psychoanalysis, unconscious mind' },
+  { name: 'Steven Pinker', domain: 'cognitive psychology, linguistics, human nature, rationality' },
+  { name: 'Fyodor Dostoevsky', domain: 'literature, existentialism, human nature' },
+  { name: 'Leo Tolstoy', domain: 'literature, moral philosophy, pacifism' },
+  { name: 'William Shakespeare', domain: 'literature, drama, human nature, language' },
+  { name: 'Jorge Luis Borges', domain: 'literature, metaphysics, philosophy of mind' },
+  { name: 'Winston Churchill', domain: 'political leadership, history, wartime strategy, rhetoric' },
+  { name: 'Leonardo da Vinci', domain: 'art, engineering, anatomy, invention, polymathy' },
+  { name: 'Steve Jobs', domain: 'technology, product design, entrepreneurship, innovation' },
+  { name: 'Elon Musk', domain: 'technology, engineering, space, first principles thinking' },
+  { name: 'Jensen Huang', domain: 'technology, semiconductors, AI, computing' },
+  { name: 'Jeff Bezos', domain: 'technology, business strategy, customer obsession, e-commerce' },
+  { name: 'Marc Andreessen', domain: 'venture capital, software, startups, techno-optimism' },
+  { name: 'Paul Graham', domain: 'startups, programming, essays, venture capital' },
+  { name: 'Peter Thiel', domain: 'venture capital, contrarian thinking, startups, monopoly theory' },
+  { name: 'Sam Altman', domain: 'AI, startups, technology, venture capital' },
+  { name: 'Peter Drucker', domain: 'management, business strategy, leadership, knowledge work' },
+  { name: 'Naval Ravikant', domain: 'startups, personal philosophy, wealth, decision-making' },
+  { name: 'Nassim Nicholas Taleb', domain: 'risk, probability, antifragility, epistemology' },
+  { name: 'Yuval Noah Harari', domain: 'history, futurism, cognitive science, anthropology' },
+  { name: 'Jordan Peterson', domain: 'depth psychology, personal development, mythology, cultural criticism' },
+  { name: 'Tim Ferriss', domain: 'productivity, self-optimization, entrepreneurship, podcasting' },
+  { name: 'James Clear', domain: 'habits, behavioral psychology, productivity, self-improvement' },
+  { name: 'Balaji Srinivasan', domain: 'technology, network state, crypto, futurism' },
+  { name: 'Tyler Cowen', domain: 'economics, cultural commentary, innovation, blogging' },
+].map(m => ({ ...m, color: _lpColor(m.name) }));
 
 let _lpGraphAnim = null;
 let _lpGraphSim = null;
@@ -298,22 +345,22 @@ function renderLandingPage() {
       bookChip: 'Thinking, Fast and Slow',
       messages: [
         { role: 'user', text: 'What are System 1 and System 2?' },
-        { role: 'assistant', text: 'System 1 operates automatically and quickly, with little effort — it\'s your intuition. System 2 allocates attention to effortful mental activities, like complex math. Most of what we think originates in System 1, but System 2 takes over when things get difficult.', sources: ['Ch.1 Two Systems', 'Ch.2 Attention and Effort'] },
+        { role: 'assistant', text: 'System 1 is fast, automatic intuition. System 2 is slow, deliberate thinking. Most decisions start in System 1, but System 2 kicks in for hard problems.', sources: ['Ch.1 Two Systems'] },
         { role: 'user', text: 'How does this affect our decisions?' },
-        { role: 'loading', text: 'Inviting great minds to share their perspectives...' },
-        { role: 'join', names: ['Richard Feynman', 'Charlie Munger'] },
-        { role: 'mind', name: 'Richard Feynman', color: '#e76f51', text: 'The key is to never fool yourself — and you are the easiest person to fool. System 1 is exactly that trap. You have to force yourself to think slowly about things that feel obvious.' },
-        { role: 'mind', name: 'Charlie Munger', color: '#9b2226', text: 'I call these "standard mental errors." Knowing the 25 cognitive biases gives you an enormous edge. Most people never learn to distrust their own thinking.' },
+        { role: 'assistant', text: 'System 1 creates cognitive biases — we jump to conclusions, anchor on first impressions, and confuse "easy to recall" with "likely to happen."', sources: ['Ch.12 Anchoring', 'Ch.13 Availability'] },
+        { role: 'join', names: ['Richard Feynman'] },
+        { role: 'mind', name: 'Richard Feynman', color: '#e76f51', text: 'The first principle is — you must not fool yourself, and you are the easiest person to fool. That\'s exactly the System 1 trap.' },
       ]
     },
     {
       title: 'General Chat',
       messages: [
         { role: 'user', text: 'How should I think about building a startup?' },
-        { role: 'assistant', text: 'Start by finding a real problem that you personally understand deeply. The best startups come from founders building something they themselves need. Focus on a small group of users who love your product rather than a large group who merely like it.' },
-        { role: 'loading', text: 'Inviting great minds to share their perspectives...' },
+        { role: 'assistant', text: 'Find a real problem you understand deeply. Build for a small group who love it, not a large group who merely like it.' },
+        { role: 'user', text: 'What about competition?' },
+        { role: 'assistant', text: 'The best strategy is often to avoid direct competition entirely — find an underserved niche and dominate it.' },
         { role: 'join', names: ['Paul Graham'] },
-        { role: 'mind', name: 'Paul Graham', color: '#588157', text: 'Make something people want. That\'s the core of it. Talk to users, build fast, iterate. Most startups die because they build something nobody wants, not because of competition.' },
+        { role: 'mind', name: 'Paul Graham', color: '#588157', text: 'Make something people want. Talk to users, build fast, iterate. Most startups die from building something nobody needs.' },
       ]
     },
     {
@@ -321,100 +368,135 @@ function renderLandingPage() {
       bookChip: 'The Art of War',
       messages: [
         { role: 'user', text: 'What is the supreme art of war?' },
-        { role: 'assistant', text: '"The supreme art of war is to subdue the enemy without fighting." Sun Tzu argues that true mastery lies in achieving objectives through strategy and positioning — making conflict unnecessary.', sources: ['Ch.3 Strategic Attack'] },
-        { role: 'loading', text: 'Inviting great minds to share their perspectives...' },
-        { role: 'join', names: ['Elon Musk', 'Charlie Munger'] },
-        { role: 'mind', name: 'Charlie Munger', color: '#9b2226', text: 'This maps perfectly to business. The best competitive advantage avoids competition entirely. Find a niche where you can be the only one, not the best one.' },
-        { role: 'mind', name: 'Elon Musk', color: '#0077b6', text: 'Sometimes you have to fight — the key is choosing which battles are worth it. First principles thinking helps you see which fights have asymmetric upside.' },
+        { role: 'assistant', text: '"To subdue the enemy without fighting." Sun Tzu argues true mastery is winning through strategy, not force.', sources: ['Ch.3 Strategic Attack'] },
+        { role: 'user', text: 'How does this apply today?' },
+        { role: 'assistant', text: 'In business, it means building advantages that make competition irrelevant — positioning over confrontation.' },
+        { role: 'join', names: ['Charlie Munger'] },
+        { role: 'mind', name: 'Charlie Munger', color: '#9b2226', text: 'The best competitive advantage avoids competition entirely. Find a niche where you\'re the only one, not the best one.' },
       ]
     },
   ];
 
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
+
   el.innerHTML = `
     <div class="lp-container">
-      <section class="lp-hero">
-        <div class="lp-hero-center">
-          <div class="greeting-row">
-            <svg class="greeting-logo" width="40" height="40" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-              <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/>
-              <rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
-              <rect x="8" y="8" width="40" height="28" fill="#DA7756"/>
-              <rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
-              <rect x="16" y="16" width="8" height="8" fill="#2D3436"/>
-              <rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
-              <rect x="18" y="18" width="4" height="4" fill="#fff"/>
-              <rect x="34" y="18" width="4" height="4" fill="#fff"/>
-              <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/>
-              <rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
-              <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
-            </svg>
-            <h1 class="greeting lp-greeting">Chat with books, great minds will join in.</h1>
-            <p class="lp-hero-subtitle">Greatest minds read with you, discuss with you, and help you build the knowledge you need.</p>
-          </div>
-          <div class="chat-composer lp-composer">
-            <div class="selected-chips" id="lp-selected-chips"></div>
-            <textarea class="composer-input" id="lp-composer-input" rows="1" placeholder="Ask about books or topics — great minds will join in..." readonly></textarea>
-            <div class="composer-toolbar">
-              <div class="composer-left">
-                <button type="button" class="composer-icon-btn" disabled title="Books & upload">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-                <button type="button" class="composer-icon-btn composer-minds-btn" disabled title="Invite great minds">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="8" cy="18" r="2.5"/><circle cx="18" cy="18" r="2"/><line x1="8.2" y1="7.2" x2="15.8" y2="7.2"/><line x1="7" y1="8.3" x2="7.5" y2="15.5"/><line x1="10.2" y1="17.2" x2="16" y2="17.8"/><line x1="16.5" y1="10.3" x2="17.5" y2="16"/></svg>
-                </button>
-              </div>
-              <button type="button" class="composer-send-btn" disabled title="Send">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-              </button>
-            </div>
-          </div>
-          <div class="home-starters" id="lp-starters">
-            <button class="starter-pill" disabled>Key ideas in "Thinking, Fast and Slow"?</button>
-            <button class="starter-pill" disabled>Teach me the fundamentals of philosophy</button>
-            <button class="starter-pill" disabled>Best books on cognitive psychology?</button>
-            <button class="starter-pill" disabled>Help me understand machine learning</button>
-          </div>
+      <nav class="lp-topbar">
+        <span class="lp-topbar-brand">Feynman</span>
+        <div class="lp-topbar-actions">
+          <button class="lp-theme-toggle" id="lp-theme-toggle" title="Toggle dark mode">
+            <svg class="lp-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="lp-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button class="lp-topbar-cta" id="lp-get-started">${window.FEYNMAN_PRO ? 'Get Started Free' : 'Start Exploring'}</button>
         </div>
+      </nav>
 
-        <div class="lp-demo-area" id="lp-chat-body"></div>
+      <section class="lp-fullscreen">
+        <div class="lp-bg-canvas" id="lp-minds-canvas-wrap"></div>
 
-        <div class="lp-hero-actions">
-          <button class="lp-cta-primary" id="lp-get-started">Get Started Free</button>
-          <button class="lp-cta-secondary" id="lp-explore">Explore Library</button>
-        </div>
-        <p class="lp-hero-note">No credit card required</p>
-      </section>
-
-      <section class="lp-minds-section">
         <div class="lp-minds-toolbar">
           <input type="text" id="lp-minds-search" placeholder="Search minds..." autocomplete="off" readonly />
           <button class="lp-minds-toolbar-btn" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Invite a Mind
           </button>
           <button class="lp-minds-toolbar-btn" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13 2 2 4-4" stroke-width="2"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13 2 2 4-4" stroke-width="2"/></svg>
             Create Your Mind
           </button>
         </div>
-        <div class="lp-minds-canvas-wrap" id="lp-minds-canvas-wrap"></div>
-      </section>
 
-      <section class="lp-bottom-cta">
-        <h2>Start learning the Feynman way</h2>
-        <p>"You learn by asking questions, by thinking, and by experimenting." — Richard Feynman</p>
-        <button class="lp-cta-primary" id="lp-bottom-start">Get Started Free</button>
+        <div class="lp-fg-center">
+          <div class="lp-hero-left">
+            <h1 class="lp-hero-headline">Chat with books,<br>great minds<br>will join in.</h1>
+            <p class="lp-hero-sub">Read the way Feynman did — turn any book into a conversation, explore beyond what's on the page, or start from a topic to discover the right books and build a knowledge system. Relevant great minds join in along the way.</p>
+          </div>
+          <div class="lp-chat-card">
+            <div class="lp-chat-home" id="lp-chat-home">
+              <div class="lp-chat-home-inner">
+                <div class="greeting-row">
+                  <svg class="greeting-logo" width="28" height="28" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                    <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/>
+                    <rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
+                    <rect x="8" y="8" width="40" height="28" fill="#DA7756"/>
+                    <rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
+                    <rect x="16" y="16" width="8" height="8" fill="#2D3436"/>
+                    <rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
+                    <rect x="18" y="18" width="4" height="4" fill="#fff"/>
+                    <rect x="34" y="18" width="4" height="4" fill="#fff"/>
+                    <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/>
+                    <rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
+                    <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
+                  </svg>
+                  <span class="greeting lp-greeting">${timeGreeting}, Steve</span>
+                </div>
+                <div class="chat-composer lp-composer">
+                  <div class="selected-chips" id="lp-selected-chips"></div>
+                  <textarea class="composer-input" id="lp-composer-input" rows="1" placeholder="Ask about books or topics — great minds will join in..." readonly></textarea>
+                  <div class="composer-toolbar">
+                    <div class="composer-left">
+                      <button type="button" class="composer-icon-btn" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      </button>
+                      <button type="button" class="composer-icon-btn composer-minds-btn" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="8" cy="18" r="2.5"/><circle cx="18" cy="18" r="2"/><line x1="8.2" y1="7.2" x2="15.8" y2="7.2"/><line x1="7" y1="8.3" x2="7.5" y2="15.5"/><line x1="10.2" y1="17.2" x2="16" y2="17.8"/><line x1="16.5" y1="10.3" x2="17.5" y2="16"/></svg>
+                      </button>
+                    </div>
+                    <button type="button" class="composer-send-btn" disabled>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="home-starters lp-starters-compact" id="lp-starters">
+                  <button class="starter-pill" disabled>Key ideas in "Thinking, Fast and Slow"?</button>
+                  <button class="starter-pill" disabled>Teach me the fundamentals of philosophy</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="lp-chat-active hidden" id="lp-chat-active">
+              <div class="lp-chat-messages" id="lp-chat-body"></div>
+              <div class="lp-chat-input-area">
+                <div class="chat-composer-inline lp-composer" id="lp-bottom-composer">
+                  <div class="selected-chips" id="lp-active-chips"></div>
+                  <textarea class="composer-input lp-active-textarea" id="lp-active-input" rows="1" placeholder="Ask a follow-up question..." readonly></textarea>
+                  <div class="composer-toolbar">
+                    <div class="composer-left">
+                      <button type="button" class="composer-icon-btn" disabled><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                      <button type="button" class="composer-icon-btn composer-minds-btn" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="8" cy="18" r="2.5"/><circle cx="18" cy="18" r="2"/><line x1="8.2" y1="7.2" x2="15.8" y2="7.2"/><line x1="7" y1="8.3" x2="7.5" y2="15.5"/><line x1="10.2" y1="17.2" x2="16" y2="17.8"/><line x1="16.5" y1="10.3" x2="17.5" y2="16"/></svg></button>
+                    </div>
+                    <button type="button" class="composer-send-btn" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>`;
 
   document.getElementById('lp-get-started').addEventListener('click', () => {
-    window.location.hash = currentUser ? '#/' : '#/login';
+    if (window.FEYNMAN_PRO) {
+      window.location.hash = currentUser ? '#/' : '#/login';
+    } else {
+      localStorage.setItem('feynman-landed', '1');
+      window.location.hash = '#/';
+    }
   });
-  document.getElementById('lp-explore').addEventListener('click', () => {
-    window.location.hash = '#/library';
-  });
-  document.getElementById('lp-bottom-start').addEventListener('click', () => {
-    window.location.hash = currentUser ? '#/' : '#/login';
+
+  document.getElementById('lp-theme-toggle').addEventListener('click', () => {
+    const isCurrentlyDark = _isDarkMode();
+    if (isCurrentlyDark) {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('feynman-theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('feynman-theme', 'dark');
+    }
   });
 
   _startLandingChatDemo(demoScenes);
@@ -442,9 +524,9 @@ function _startLandingSearchDemo() {
         i++;
         input.value = term.slice(0, i);
         _lpHighlightQuery = input.value.toLowerCase();
-        _lpSearchTimer = setTimeout(typeNext, 100 + Math.random() * 60);
+        _lpSearchTimer = setTimeout(typeNext, 80 + Math.random() * 50);
       } else {
-        _lpSearchTimer = setTimeout(cb, 2500);
+        _lpSearchTimer = setTimeout(cb, 1800);
       }
     }
     typeNext();
@@ -458,43 +540,107 @@ function _startLandingSearchDemo() {
         i--;
         input.value = term.slice(0, i);
         _lpHighlightQuery = input.value.toLowerCase();
-        _lpSearchTimer = setTimeout(delNext, 40);
+        _lpSearchTimer = setTimeout(delNext, 30);
       } else {
         _lpHighlightQuery = '';
-        _lpSearchTimer = setTimeout(cb, 600);
+        _lpSearchTimer = setTimeout(cb, 400);
       }
     }
     delNext();
   }
 
+  const discoverMinds = [
+    { name: 'Galileo Galilei', domain: 'physics, astronomy' },
+    { name: 'Ada Lovelace', domain: 'mathematics, computing' },
+    { name: 'Marie Curie', domain: 'physics, chemistry, radiation' },
+  ];
+  let discoverIdx = 0;
+
   function simulateDiscover(cb) {
-    _lpDiscoverActive = true;
+    const graphNodes = window._lpGraphNodes;
+    const graphLinks = window._lpGraphLinks;
+    const graphSim = _lpGraphSim;
+    const graphParticles = window._lpGraphParticles;
+    if (!graphNodes || !graphSim) { _lpSearchTimer = setTimeout(cb, 500); return; }
+
+    const cz = window._lpClearZone;
+    const allCandidates = graphNodes.filter(n => !n._isAdd && n.id !== '__lp_discover__');
+    const outsideNodes = cz
+      ? allCandidates.filter(n => Math.abs(n.x - cz.cx) > cz.hw || Math.abs(n.y - cz.cy) > cz.hh)
+      : allCandidates;
+    const visibleNodes = outsideNodes.length > 0 ? outsideNodes : allCandidates;
+    if (!visibleNodes.length) { _lpSearchTimer = setTimeout(cb, 500); return; }
+    const sourceNode = visibleNodes[Math.floor(Math.random() * visibleNodes.length)];
+
+    sourceNode._expanding = true;
+
     _lpSearchTimer = setTimeout(() => {
-      const newMind = { name: 'Galileo Galilei', domain: 'physics, astronomy', color: '#457b9d' };
+      sourceNode._expanding = false;
+
+      const pick = discoverMinds[discoverIdx % discoverMinds.length];
+      discoverIdx++;
+      const newMind = { name: pick.name, domain: pick.domain, color: _lpColor(pick.name) };
       const ini = newMind.name.split(/\s+/).slice(0, 2).map(w => w[0]).join('');
       const tok = newMind.domain.split(/[,;\/&]+/).map(d => d.trim()).filter(Boolean);
-      _lpDiscoverNode = {
-        id: 'lp_new_' + Date.now(), name: newMind.name, domain: newMind.domain,
-        color: newMind.color, initials: ini, tokens: tok,
-        _newAt: performance.now(),
-      };
-      _lpDiscoverActive = false;
-      _lpSearchTimer = setTimeout(cb, 6000);
-    }, 2500);
+
+      const existing = graphNodes.find(n => n.id === '__lp_discover__');
+      if (existing) {
+        existing.name = newMind.name;
+        existing.domain = newMind.domain;
+        existing.color = newMind.color;
+        existing.initials = ini;
+        existing.tokens = tok;
+        existing._newAt = performance.now();
+        existing.x = sourceNode.x + (Math.random() - 0.5) * 50;
+        existing.y = sourceNode.y + (Math.random() - 0.5) * 50;
+        existing.vx = 0;
+        existing.vy = 0;
+      } else {
+        const dn = {
+          id: '__lp_discover__', name: newMind.name, domain: newMind.domain,
+          color: newMind.color, initials: ini, tokens: tok,
+          _newAt: performance.now(),
+          x: sourceNode.x + (Math.random() - 0.5) * 50,
+          y: sourceNode.y + (Math.random() - 0.5) * 50,
+          vx: 0, vy: 0,
+        };
+        graphNodes.push(dn);
+        const nl = { source: dn, target: sourceNode, strength: 1 };
+        graphLinks.push(nl);
+        if (graphParticles) {
+          graphParticles.push({ link: nl, t: Math.random(), speed: 0.002, size: 1.5, opacity: 0.5 });
+        }
+        graphSim.nodes(graphNodes);
+        graphSim.force('link').links(graphLinks);
+      }
+      graphSim.alpha(0.15).restart();
+
+      _lpSearchTimer = setTimeout(cb, 5000);
+    }, 2000);
   }
 
+  const searchTerms = ['Feynman', 'Munger', 'Socrates', 'Einstein', 'Paul Graham'];
+  let termIdx = 0;
+  let cycleCount = 0;
+
   function runCycle() {
-    typeTerm('physics', () => {
+    const term = searchTerms[termIdx % searchTerms.length];
+    termIdx++;
+    cycleCount++;
+    typeTerm(term, () => {
       clearTerm(() => {
-        simulateDiscover(() => {
-          _lpDiscoverNode = null;
-          _lpSearchTimer = setTimeout(runCycle, 1500);
-        });
+        if (cycleCount % 2 === 0) {
+          simulateDiscover(() => {
+            _lpSearchTimer = setTimeout(runCycle, 1500);
+          });
+        } else {
+          _lpSearchTimer = setTimeout(runCycle, 1000);
+        }
       });
     });
   }
 
-  _lpSearchTimer = setTimeout(runCycle, 2500);
+  _lpSearchTimer = setTimeout(runCycle, 3000);
 }
 
 function _renderLandingMindsGraph() {
@@ -548,6 +694,69 @@ function _renderLandingMindsGraph() {
   addNode.x = W / 2 + 160;
   addNode.y = H / 2 - 100;
 
+  window._lpGraphNodes = nodes;
+  window._lpGraphLinks = links;
+  window._lpGraphParticles = particles;
+
+  const heroW = 340, heroH = 300;
+  const heroCx = W * 0.06 + heroW / 2, heroCy = H / 2;
+  const heroHalfW = heroW / 2 + 60, heroHalfH = heroH / 2 + 50;
+
+  const cardW = Math.min(620, W * 0.55);
+  const cardH = Math.min(520, H - 120);
+  const cardCx = W - W * 0.04 - cardW / 2, cardCy = H / 2;
+  const cardHalfW = cardW / 2 + 50, cardHalfH = cardH / 2 + 40;
+
+  window._lpClearZone = { cx: cardCx, cy: cardCy, hw: cardHalfW, hh: cardHalfH };
+
+  const clearZones = [
+    { cx: heroCx, cy: heroCy, hw: heroHalfW, hh: heroHalfH },
+    { cx: cardCx, cy: cardCy, hw: cardHalfW, hh: cardHalfH },
+  ];
+
+  function makeAvoidForce() {
+    let ns;
+    function force() {
+      for (const n of ns) {
+        if (n._isAdd) continue;
+        for (const z of clearZones) {
+          const dx = n.x - z.cx, dy = n.y - z.cy;
+          const overlapX = z.hw - Math.abs(dx);
+          const overlapY = z.hh - Math.abs(dy);
+          if (overlapX > 0 && overlapY > 0) {
+            if (overlapX < overlapY) {
+              const sign = dx >= 0 ? 1 : -1;
+              n.vx += sign * overlapX * 0.08;
+              n.vx *= 0.85;
+            } else {
+              const sign = dy >= 0 ? 1 : -1;
+              n.vy += sign * overlapY * 0.08;
+              n.vy *= 0.85;
+            }
+          }
+        }
+      }
+    }
+    force.initialize = function(n) { ns = n; };
+    return force;
+  }
+
+  const PAD = BASE_R + 45;
+  function makeBoundsForce() {
+    let ns;
+    function force() {
+      for (const n of ns) {
+        if (n._isAdd) continue;
+        if (n.x < PAD) { n.vx += (PAD - n.x) * 0.1; n.vx *= 0.8; }
+        if (n.x > W - PAD) { n.vx += (W - PAD - n.x) * 0.1; n.vx *= 0.8; }
+        if (n.y < PAD) { n.vy += (PAD - n.y) * 0.1; n.vy *= 0.8; }
+        if (n.y > H - PAD) { n.vy += (H - PAD - n.y) * 0.1; n.vy *= 0.8; }
+      }
+    }
+    force.initialize = function(n) { ns = n; };
+    return force;
+  }
+
   const sim = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(links).id(d => d.id).distance(d => Math.max(80, 280 - d.strength * 70)).strength(d => 0.08 + d.strength * 0.15))
     .force('charge', d3.forceManyBody().strength(-600).distanceMax(800))
@@ -555,7 +764,10 @@ function _renderLandingMindsGraph() {
     .force('collision', d3.forceCollide().radius(d => d._isAdd ? ADD_R + 15 : BASE_R + 20))
     .force('x', d3.forceX(W / 2).strength(0.02))
     .force('y', d3.forceY(H / 2).strength(0.02))
-    .alphaDecay(0.015);
+    .force('avoid', makeAvoidForce())
+    .force('bounds', makeBoundsForce())
+    .alphaDecay(0.03)
+    .velocityDecay(0.35);
   _lpGraphSim = sim;
 
   let hoveredNode = null;
@@ -576,14 +788,14 @@ function _renderLandingMindsGraph() {
   function draw() {
     const now = performance.now();
     ctx.save();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#ffffff';
     ctx.fillRect(0, 0, W, H);
 
     const q = _lpHighlightQuery;
     const matchIds = new Set();
     if (q) {
       nodes.forEach(n => {
-        if (n.name.toLowerCase().includes(q) || n.domain.toLowerCase().includes(q)) matchIds.add(n.id);
+        if (n.name.toLowerCase().includes(q)) matchIds.add(n.id);
       });
     }
     const filtering = matchIds.size > 0;
@@ -625,23 +837,6 @@ function _renderLandingMindsGraph() {
         addNode.x = cx + Math.cos(a) * (maxD + BASE_R * 3.5);
         addNode.y = cy + Math.sin(a) * (maxD + BASE_R * 3.5);
       }
-    }
-
-    if (_lpDiscoverNode && !nodes.find(n => n.id === _lpDiscoverNode.id)) {
-      const dn = _lpDiscoverNode;
-      dn.x = addNode.x;
-      dn.y = addNode.y;
-      nodes.push(dn);
-      const nearestNonAdd = nodes.filter(n => !n._isAdd && n.id !== dn.id);
-      const connected = nearestNonAdd.filter(n => dn.tokens.some(t => n.tokens && n.tokens.some(u => t === u || t.includes(u) || u.includes(t))));
-      (connected.length ? connected : nearestNonAdd.slice(0, 2)).forEach(n => {
-        const l = { source: dn, target: n, strength: 1 };
-        links.push(l);
-        particles.push({ link: l, t: Math.random(), speed: 0.002 + Math.random() * 0.003, size: 1.5, opacity: 0.5 });
-      });
-      sim.nodes(nodes);
-      sim.force('link').links(links);
-      sim.alpha(0.5).restart();
     }
 
     for (const n of nodes) {
@@ -741,6 +936,16 @@ function _renderLandingMindsGraph() {
         }
       }
 
+      if (n._expanding) {
+        const spinAngle = (now * 0.003) % (Math.PI * 2);
+        const spinR = rr + 10;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, spinR, spinAngle, spinAngle + Math.PI * 1.2);
+        ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.7)`;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+
       if (highlighted || hovered) {
         ctx.beginPath(); ctx.arc(n.x, n.y, rr + 3, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(${cr},${cg},${cb},${hovered ? 0.5 : 0.3})`;
@@ -750,7 +955,8 @@ function _renderLandingMindsGraph() {
       ctx.beginPath(); ctx.arc(n.x, n.y, rr, 0, Math.PI * 2);
       ctx.fillStyle = dimmed ? `rgba(${cr},${cg},${cb},${nodeAlpha})` : n.color;
       ctx.fill();
-      ctx.strokeStyle = dimmed ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.25)';
+      const dk = _isDarkMode();
+      ctx.strokeStyle = dimmed ? (dk ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : 'rgba(255,255,255,0.25)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
@@ -761,13 +967,14 @@ function _renderLandingMindsGraph() {
         ctx.textBaseline = 'middle';
         ctx.fillText(n.initials, n.x, n.y);
 
-        ctx.fillStyle = `rgba(30,35,50,${hovered ? 0.9 : 0.7})`;
+        ctx.fillStyle = dk ? `rgba(245,245,247,${hovered ? 0.95 : 0.8})` : `rgba(30,35,50,${hovered ? 0.9 : 0.7})`;
         ctx.font = `600 ${hovered ? 12 : 11}px 'Libre Baskerville', Georgia, serif`;
         ctx.fillText(n.name, n.x, n.y + rr + 14);
 
-        ctx.fillStyle = 'rgba(100,110,130,0.6)';
+        ctx.fillStyle = dk ? 'rgba(200,200,210,0.6)' : 'rgba(100,110,130,0.6)';
         ctx.font = '400 9px Inter, sans-serif';
-        ctx.fillText(n.domain, n.x, n.y + rr + 27);
+        const domainLabel = n.domain.length > 30 ? n.domain.slice(0, 28) + '…' : n.domain;
+        ctx.fillText(domainLabel, n.x, n.y + rr + 27);
       }
     }
 
@@ -782,11 +989,13 @@ function _renderLandingMindsGraph() {
 function _startLandingChatDemo(scenes) {
   if (_landingChatTimer) { clearTimeout(_landingChatTimer); _landingChatTimer = null; }
 
+  const homeEl = document.getElementById('lp-chat-home');
+  const activeEl = document.getElementById('lp-chat-active');
   const bodyEl = document.getElementById('lp-chat-body');
-  const chipsEl = document.getElementById('lp-selected-chips');
-  const inputEl = document.getElementById('lp-composer-input');
+  const homeInputEl = document.getElementById('lp-composer-input');
+  const activeChipsEl = document.getElementById('lp-active-chips');
   const startersEl = document.getElementById('lp-starters');
-  if (!bodyEl) return;
+  if (!bodyEl || !homeEl || !activeEl) return;
 
   let sceneIdx = 0;
 
@@ -816,17 +1025,17 @@ function _startLandingChatDemo(scenes) {
   }
 
   function _typeInput(text, cb) {
-    if (!inputEl) { if (cb) cb(); return; }
-    inputEl.value = '';
+    if (!homeInputEl) { if (cb) cb(); return; }
+    homeInputEl.value = '';
     let i = 0;
     function tick() {
       if (i < text.length) {
         i++;
-        inputEl.value = text.slice(0, i);
+        homeInputEl.value = text.slice(0, i);
         _landingChatTimer = setTimeout(tick, 40 + Math.random() * 30);
       } else {
         _landingChatTimer = setTimeout(() => {
-          inputEl.value = '';
+          homeInputEl.value = '';
           if (cb) cb();
         }, 400);
       }
@@ -839,28 +1048,55 @@ function _startLandingChatDemo(scenes) {
     return `<span class="lp-mn-avatar" style="background:${color}">${ini}</span>`;
   }
 
+  function switchToChat(scene) {
+    homeEl.classList.add('hidden');
+    activeEl.classList.remove('hidden');
+    if (activeChipsEl) {
+      activeChipsEl.innerHTML = scene.bookChip
+        ? `<div class="book-chip"><span>${esc(scene.bookChip)}</span></div>`
+        : '';
+    }
+  }
+
+  function switchToHome() {
+    activeEl.classList.add('hidden');
+    homeEl.classList.remove('hidden');
+    bodyEl.innerHTML = '';
+    if (activeChipsEl) activeChipsEl.innerHTML = '';
+  }
+
   function playScene() {
     const scene = scenes[sceneIdx % scenes.length];
     sceneIdx++;
 
     bodyEl.innerHTML = '';
-
-    if (chipsEl) {
-      chipsEl.innerHTML = scene.bookChip
-        ? `<div class="book-chip"><span>${esc(scene.bookChip)}</span></div>`
-        : '';
-    }
     if (startersEl) startersEl.style.display = 'none';
 
-    let msgIdx = 0;
+    const firstUserMsg = scene.messages.find(m => m.role === 'user');
+    if (!firstUserMsg) { switchToChat(scene); startMessages(scene, 0); return; }
+
+    _typeInput(firstUserMsg.text, () => {
+      switchToChat(scene);
+      const div = document.createElement('div');
+      div.className = 'lp-msg lp-msg-user';
+      div.textContent = firstUserMsg.text;
+      _animateIn(div);
+      bodyEl.appendChild(div);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+      _landingChatTimer = setTimeout(() => startMessages(scene, 1), 800);
+    });
+  }
+
+  function startMessages(scene, fromIdx) {
+    let msgIdx = fromIdx;
 
     function showNext() {
       if (msgIdx >= scene.messages.length) {
         _landingChatTimer = setTimeout(() => {
-          bodyEl.style.opacity = '0';
+          activeEl.style.opacity = '0';
           setTimeout(() => {
-            bodyEl.style.opacity = '1';
-            if (chipsEl) chipsEl.innerHTML = '';
+            activeEl.style.opacity = '1';
+            switchToHome();
             if (startersEl) startersEl.style.display = '';
             playScene();
           }, 400);
@@ -872,15 +1108,13 @@ function _startLandingChatDemo(scenes) {
       msgIdx++;
 
       if (msg.role === 'user') {
-        _typeInput(msg.text, () => {
-          const div = document.createElement('div');
-          div.className = 'lp-msg lp-msg-user';
-          div.textContent = msg.text;
-          _animateIn(div);
-          bodyEl.appendChild(div);
-          bodyEl.scrollTop = bodyEl.scrollHeight;
-          _landingChatTimer = setTimeout(showNext, 800);
-        });
+        const div = document.createElement('div');
+        div.className = 'lp-msg lp-msg-user';
+        div.textContent = msg.text;
+        _animateIn(div);
+        bodyEl.appendChild(div);
+        bodyEl.scrollTop = bodyEl.scrollHeight;
+        _landingChatTimer = setTimeout(showNext, 800);
 
       } else if (msg.role === 'assistant') {
         const div = document.createElement('div');
@@ -938,7 +1172,7 @@ function _startLandingChatDemo(scenes) {
       }
     }
 
-    _landingChatTimer = setTimeout(showNext, 1200);
+    showNext();
   }
 
   playScene();
@@ -1791,8 +2025,8 @@ async function _inviteMindsToChat(chatBox, message, bookContext, agentIds) {
 
     if (!mindIds.length) return;
 
-    if (newJoinedNames.length) {
-      appendJoinNotice(chatBox, newJoinedNames);
+    for (const name of newJoinedNames) {
+      appendJoinNotice(chatBox, [name]);
     }
 
     const history = [];
@@ -2621,7 +2855,7 @@ function _renderMindsGraph() {
   function draw() {
     time.now = performance.now();
     ctx.save();
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#ffffff';
     ctx.fillRect(0, 0, W, H);
     ctx.translate(transform.x, transform.y);
     ctx.scale(transform.k, transform.k);
@@ -2630,8 +2864,7 @@ function _renderMindsGraph() {
     if (state.highlightQuery) {
       const q = state.highlightQuery.toLowerCase();
       nodes.forEach(n => {
-        if (n.name.toLowerCase().includes(q) || n.domain.toLowerCase().includes(q) || n.era.toLowerCase().includes(q))
-          matchIds.add(n.id);
+        if (n.name.toLowerCase().includes(q)) matchIds.add(n.id);
       });
     }
     const filtering = matchIds.size > 0;
@@ -2827,7 +3060,8 @@ function _renderMindsGraph() {
       ctx.arc(n.x, n.y, rr, 0, Math.PI * 2);
       ctx.fillStyle = dimmed ? `rgba(${cr},${cg},${cb},${nodeAlpha})` : n.color;
       ctx.fill();
-      ctx.strokeStyle = dimmed ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.25)';
+      const dk = _isDarkMode();
+      ctx.strokeStyle = dimmed ? (dk ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)') : 'rgba(255,255,255,0.25)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
@@ -2838,11 +3072,11 @@ function _renderMindsGraph() {
         ctx.textBaseline = 'middle';
         ctx.fillText(n.initials, n.x, n.y);
 
-        ctx.fillStyle = `rgba(30,35,50,${hovered ? 0.9 : 0.7})`;
+        ctx.fillStyle = dk ? `rgba(245,245,247,${hovered ? 0.95 : 0.8})` : `rgba(30,35,50,${hovered ? 0.9 : 0.7})`;
         ctx.font = `600 ${hovered ? 12 : 11}px 'Libre Baskerville', Georgia, serif`;
         ctx.fillText(n.name, n.x, n.y + rr + 14);
 
-        ctx.fillStyle = 'rgba(100,110,130,0.6)';
+        ctx.fillStyle = dk ? 'rgba(200,200,210,0.6)' : 'rgba(100,110,130,0.6)';
         ctx.font = `400 9px Inter, sans-serif`;
         ctx.fillText(n.era, n.x, n.y + rr + 27);
       }
@@ -3308,7 +3542,7 @@ function showCreateMindDialog() {
       <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">Paste a Twitter/X profile link, blog URL, or text content to generate a mind agent.</p>
       <input type="text" id="create-mind-name" placeholder="Name" autocomplete="off" />
       <input type="text" id="create-mind-url" placeholder="Twitter/X profile or blog URL (optional)" autocomplete="off" style="margin-top:8px" />
-      <textarea id="create-mind-content" placeholder="Or paste text content here — tweets, blog posts, notes, markdown..." rows="5" style="margin-top:8px;width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-main)"></textarea>
+      <textarea id="create-mind-content" placeholder="Or paste text content here — tweets, blog posts, notes, markdown..." rows="5" style="margin-top:8px;width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-chat);color:var(--text)"></textarea>
       <input type="file" id="create-mind-file" accept=".md,.txt,.markdown" hidden />
       <button type="button" id="create-mind-file-btn" style="margin-top:6px;font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0">or upload a .md / .txt file</button>
       <div class="mind-add-actions" style="margin-top:14px">
@@ -3374,7 +3608,19 @@ function showCreateMindDialog() {
 /* renderPerspectives removed — minds now render inline as chat messages */
 
 // ─── Init ───
+function initTheme() {
+  const saved = localStorage.getItem('feynman-theme');
+  if (saved === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  } else if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  }
+}
+
 async function init() {
+  initTheme();
   await loadProConfig();
   if (window.FEYNMAN_PRO) await initSupabase();
   await Promise.all([loadAgents(), loadVotes(), loadTopics(), loadMinds()]);
@@ -3388,6 +3634,12 @@ async function init() {
   // Sidebar toggle
   document.getElementById('sidebar-toggle-btn').addEventListener('click', toggleSidebar);
   document.getElementById('sidebar-float-btn').addEventListener('click', toggleSidebar);
+
+  document.getElementById('sidebar-theme-toggle').addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    document.documentElement.classList.toggle('light', !isDark);
+    localStorage.setItem('feynman-theme', isDark ? 'dark' : 'light');
+  });
 
   // Chats page
   document.getElementById('chats-search').addEventListener('input', e => {
