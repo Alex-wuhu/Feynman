@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import os
 import logging
-import time
 
 import jwt
-from jwt import PyJWKClient
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse
@@ -15,15 +13,7 @@ from ..core.db import get_or_create_user
 log = logging.getLogger(__name__)
 
 SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET", "")
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-
-HMAC_ALGORITHMS = {"HS256", "HS384", "HS512"}
-ASYMMETRIC_ALGORITHMS = {"ES256", "RS256", "EdDSA"}
-ALL_ALGORITHMS = list(HMAC_ALGORITHMS | ASYMMETRIC_ALGORITHMS)
-
-_jwks_client: PyJWKClient | None = None
-_jwks_client_init_time: float = 0
-_JWKS_REFRESH_INTERVAL = 600  # re-create client every 10 min to pick up rotated keys
+JWT_ALGORITHMS = ["HS256"]
 
 PUBLIC_PATHS = {
     "/", "/api/health",
@@ -36,51 +26,6 @@ PUBLIC_PATHS = {
     "/favicon.ico",
 }
 PUBLIC_PREFIXES = ("/static/",)
-
-
-def _get_jwks_client() -> PyJWKClient | None:
-    global _jwks_client, _jwks_client_init_time
-    if not SUPABASE_URL:
-        return None
-    now = time.monotonic()
-    if _jwks_client is None or (now - _jwks_client_init_time) > _JWKS_REFRESH_INTERVAL:
-        jwks_url = f"{SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
-        _jwks_client = PyJWKClient(jwks_url, cache_keys=True, lifespan=_JWKS_REFRESH_INTERVAL)
-        _jwks_client_init_time = now
-        log.info("Initialized JWKS client from %s", jwks_url)
-    return _jwks_client
-
-
-def _decode_token(token: str) -> dict:
-    """Decode and verify a Supabase JWT, supporting both HMAC and asymmetric algorithms."""
-    header = jwt.get_unverified_header(token)
-    token_alg = header.get("alg", "unknown")
-
-    if token_alg in HMAC_ALGORITHMS:
-        if not SUPABASE_JWT_SECRET:
-            raise jwt.InvalidTokenError(
-                f"Token uses {token_alg} but SUPABASE_JWT_SECRET is not set"
-            )
-        return jwt.decode(
-            token, SUPABASE_JWT_SECRET,
-            algorithms=list(HMAC_ALGORITHMS),
-            audience="authenticated",
-        )
-
-    if token_alg in ASYMMETRIC_ALGORITHMS:
-        client = _get_jwks_client()
-        if not client:
-            raise jwt.InvalidTokenError(
-                f"Token uses {token_alg} but SUPABASE_URL is not set for JWKS discovery"
-            )
-        signing_key = client.get_signing_key_from_jwt(token)
-        return jwt.decode(
-            token, signing_key.key,
-            algorithms=list(ASYMMETRIC_ALGORITHMS),
-            audience="authenticated",
-        )
-
-    raise jwt.InvalidAlgorithmError(f"Unsupported JWT algorithm: {token_alg}")
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -105,7 +50,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         token = auth_header[7:]
         try:
-            payload = _decode_token(token)
+            payload = jwt.decode(
+                token, SUPABASE_JWT_SECRET,
+                algorithms=JWT_ALGORITHMS,
+                audience="authenticated",
+            )
         except jwt.ExpiredSignatureError:
             if is_get_api:
                 return await call_next(request)

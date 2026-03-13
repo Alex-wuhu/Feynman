@@ -78,14 +78,15 @@ if os.getenv("ENABLE_AUTH"):
     from .pro.auth import AuthMiddleware
     app.add_middleware(AuthMiddleware)
 
+# ─── Pro: Stripe routes ───
+_has_stripe = bool(os.getenv("STRIPE_SECRET_KEY"))
+if _has_stripe:
+    from .pro.stripe import router as stripe_router
+    app.include_router(stripe_router)
+
 # ─── Pro: Subscription status (always available when auth is on) ───
 if os.getenv("ENABLE_AUTH"):
     from .core.db import get_user as _get_user
-
-    _stripe_mod = None
-    if os.getenv("STRIPE_SECRET_KEY"):
-        import stripe as _stripe_mod
-        _stripe_mod.api_key = os.getenv("STRIPE_SECRET_KEY")
 
     @app.get("/api/pro/subscription")
     async def get_subscription(request: Request):
@@ -96,26 +97,22 @@ if os.getenv("ENABLE_AUTH"):
         if not user:
             return {"tier": "free", "subscription": None}
         sub_info = None
-        if user.get("stripe_subscription_id") and _stripe_mod:
+        if user.get("stripe_subscription_id") and _has_stripe:
             try:
-                sub = _stripe_mod.Subscription.retrieve(user["stripe_subscription_id"])
+                import stripe
+                sub = stripe.Subscription.retrieve(user["stripe_subscription_id"])
                 sub_info = {
                     "status": sub.status,
                     "current_period_end": sub.current_period_end,
                     "cancel_at_period_end": sub.cancel_at_period_end,
                 }
-            except _stripe_mod.error.StripeError:
+            except Exception:
                 pass
         return {
             "tier": user.get("tier", "free"),
             "email": user.get("email", ""),
             "subscription": sub_info,
         }
-
-# ─── Pro: Stripe routes ───
-if os.getenv("STRIPE_SECRET_KEY"):
-    from .pro.stripe import router as stripe_router
-    app.include_router(stripe_router)
 
 # Quota helpers (no-op when auth is disabled)
 def _check_quota(request: Request, action: str) -> None:

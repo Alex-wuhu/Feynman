@@ -345,7 +345,7 @@ function renderSubscriptionPage() {
       'Everything in Free',
       'Discover more books in chat & library',
       'Great minds continuously join chats',
-      'Invite & chat one-on-one with minds',
+      'Invite & chat with greater minds',
       'Invite great minds by name',
       'Create minds from any source',
       'Discover & expand the minds network',
@@ -1420,7 +1420,8 @@ async function api(path, opts = {}) {
     opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + authToken };
   }
   let r = await fetch(path, opts);
-  let d = await r.json();
+  let d;
+  try { d = await r.json(); } catch { d = { detail: r.statusText || 'Request failed' }; }
   if (r.status === 429 && d.detail?.code === 'quota_exceeded') {
     showUpgradeModal(d.detail);
     throw new Error(d.detail.message || 'Quota exceeded');
@@ -1434,7 +1435,7 @@ async function api(path, opts = {}) {
         currentUser = session.user;
         opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + authToken };
         r = await fetch(path, opts);
-        d = await r.json();
+        try { d = await r.json(); } catch { d = { detail: r.statusText || 'Request failed' }; }
       }
     } catch {}
   }
