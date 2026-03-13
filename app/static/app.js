@@ -1412,7 +1412,7 @@ window.addEventListener('hashchange', navigate);
 function toggleSidebar() {
   document.getElementById('app-layout').classList.toggle('sidebar-collapsed');
   const menu = document.getElementById('sidebar-user-menu');
-  if (menu) { menu.classList.remove('open'); menu.style.bottom = ''; }
+  if (menu) menu.classList.remove('open');
 }
 
 // ─── API ───
@@ -3870,12 +3870,10 @@ async function init() {
   if (profileBtn && userMenu) {
     profileBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const collapsed = document.getElementById('app-layout').classList.contains('sidebar-collapsed');
-      if (collapsed && !userMenu.classList.contains('open')) {
+      if (!userMenu.classList.contains('open')) {
         const rect = profileBtn.getBoundingClientRect();
         userMenu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-      } else if (!collapsed) {
-        userMenu.style.bottom = '';
+        userMenu.style.left = rect.left + 'px';
       }
       userMenu.classList.toggle('open');
     });

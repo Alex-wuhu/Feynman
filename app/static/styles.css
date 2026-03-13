@@ -226,11 +226,6 @@ body {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   justify-content: center;
 }
-.app-layout.sidebar-collapsed .sidebar-user-menu {
-  position: fixed;
-  bottom: auto;
-  left: 58px;
-}
 
 .sidebar-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -368,11 +363,11 @@ body {
 
 /* User popup menu */
 .sidebar-user-menu {
-  display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
+  display: none; position: fixed;
   min-width: 220px; background: var(--bg-chat);
   border: 1px solid var(--border); border-radius: 12px;
   box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.18));
-  z-index: 100; padding: 6px;
+  z-index: 1000; padding: 6px;
   animation: userMenuIn 0.15s ease-out;
 }
 .sidebar-user-menu.open { display: block; }
