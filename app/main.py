@@ -78,6 +78,37 @@ if os.getenv("ENABLE_AUTH"):
     from .pro.auth import AuthMiddleware
     app.add_middleware(AuthMiddleware)
 
+# ─── Pro: Subscription status (always available when auth is on) ───
+if os.getenv("ENABLE_AUTH"):
+    from .core.db import get_user as _get_user
+
+    @app.get("/api/pro/subscription")
+    async def get_subscription(request: Request):
+        user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Authentication required")
+        user = _get_user(user_id)
+        if not user:
+            return {"tier": "free", "subscription": None}
+        sub_info = None
+        if user.get("stripe_subscription_id") and os.getenv("STRIPE_SECRET_KEY"):
+            try:
+                import stripe as _stripe
+                _stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+                sub = _stripe.Subscription.retrieve(user["stripe_subscription_id"])
+                sub_info = {
+                    "status": sub.status,
+                    "current_period_end": sub.current_period_end,
+                    "cancel_at_period_end": sub.cancel_at_period_end,
+                }
+            except Exception:
+                pass
+        return {
+            "tier": user.get("tier", "free"),
+            "email": user.get("email", ""),
+            "subscription": sub_info,
+        }
+
 # ─── Pro: Stripe routes ───
 if os.getenv("STRIPE_SECRET_KEY"):
     from .pro.stripe import router as stripe_router

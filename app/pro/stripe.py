@@ -99,35 +99,6 @@ async def stripe_webhook(request: Request):
     return JSONResponse({"status": "ok"})
 
 
-@router.get("/subscription")
-async def get_subscription(request: Request):
-    user_id = getattr(request.state, "user_id", None)
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Authentication required")
-
-    user = get_user(user_id)
-    if not user:
-        return {"tier": "free", "subscription": None}
-
-    sub_info = None
-    if user.get("stripe_subscription_id") and STRIPE_SECRET_KEY:
-        try:
-            sub = stripe.Subscription.retrieve(user["stripe_subscription_id"])
-            sub_info = {
-                "status": sub.status,
-                "current_period_end": sub.current_period_end,
-                "cancel_at_period_end": sub.cancel_at_period_end,
-            }
-        except stripe.error.StripeError:
-            pass
-
-    return {
-        "tier": user.get("tier", "free"),
-        "email": user.get("email", ""),
-        "subscription": sub_info,
-    }
-
-
 @router.post("/create-portal-session")
 async def create_portal_session(request: Request):
     user_id = getattr(request.state, "user_id", None)

@@ -174,6 +174,11 @@ function showUpgradeModal(detail) {
   overlay.querySelector('#upgrade-dismiss').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   overlay.querySelector('#upgrade-go').addEventListener('click', async () => {
+    if (!proConfig?.stripe_enabled) {
+      alert('Payments are not configured on this server.');
+      overlay.remove();
+      return;
+    }
     try {
       const data = await api('/api/pro/create-checkout-session', { method: 'POST' });
       if (data.url) window.location.href = data.url;
@@ -375,6 +380,10 @@ function renderSubscriptionPage() {
     if (upgradeBtn) {
       upgradeBtn.addEventListener('click', async () => {
         if (!currentUser) { window.location.hash = '#/login'; return; }
+        if (!proConfig?.stripe_enabled) {
+          alert('Payments are not configured on this server.');
+          return;
+        }
         upgradeBtn.textContent = 'Redirecting...';
         upgradeBtn.disabled = true;
         try {
