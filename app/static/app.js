@@ -316,13 +316,13 @@ function renderSubscriptionPage() {
     const freeFeatures = [
       'Chat with any book in your library',
       'Four-layer answers: text, metadata, web, LLM',
-      'Great minds auto-join your first chat',
+      'Great minds join once per chat',
       'Discover topics and books',
       'Upload your own books (PDF / TXT)',
     ];
     const proFeatures = [
       'Everything in Free',
-      'Great minds join every conversation',
+      'Great minds continuously join chats',
       'Invite & chat one-on-one with minds',
       'Invite famous thinkers by name',
       'Create minds from any source',
