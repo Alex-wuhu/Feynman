@@ -549,7 +549,7 @@ function renderLandingPage() {
   el.innerHTML = `
     <div class="lp-container">
       <nav class="lp-topbar">
-        <span class="lp-topbar-brand"><svg width="20" height="21" viewBox="0 0 64 68" fill="none"><path d="M32,30 L8,56 Q4,60 6,62" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M32,30 L56,56 Q60,60 58,62" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="32" y1="30" x2="32" y2="36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="30" r="3.5" fill="currentColor"/><path d="M32,30 C26,24 38,18 32,12 C26,6 38,0 32,-4" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>Feynman</span>
+        <span class="lp-topbar-brand"><svg width="19" height="19" viewBox="0 0 64 64" fill="none"><line x1="8" y1="58" x2="32" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><line x1="56" y1="58" x2="32" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="30" r="3.5" fill="currentColor"/><path d="M32,30 C26,24 38,18 32,12 C26,6 38,0 32,-4" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Feynman</span>
         <div class="lp-topbar-actions">
           <button class="lp-theme-toggle" id="lp-theme-toggle" title="Toggle dark mode">
             <svg class="lp-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -565,12 +565,12 @@ function renderLandingPage() {
         <div class="lp-minds-toolbar">
           <input type="text" id="lp-minds-search" placeholder="Search minds..." autocomplete="off" readonly />
           <button class="lp-minds-toolbar-btn" disabled>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Invite a Mind
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="4" cy="6" r="2"/><circle cx="20" cy="6" r="2"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/><line x1="9.5" y1="10" x2="5.5" y2="7.5"/><line x1="14.5" y1="10" x2="18.5" y2="7.5"/><line x1="9.5" y1="14" x2="5.5" y2="16.5"/><line x1="14.5" y1="14" x2="18.5" y2="16.5"/></svg>
+            Expand Network
           </button>
           <button class="lp-minds-toolbar-btn" disabled>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="m10 13 2 2 4-4" stroke-width="2"/></svg>
-            Create Your Mind
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload a Mind
           </button>
         </div>
 
@@ -583,19 +583,27 @@ function renderLandingPage() {
             <div class="lp-chat-home" id="lp-chat-home">
               <div class="lp-chat-home-inner">
                 <div class="greeting-row">
-                  <svg class="greeting-logo" width="28" height="28" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
-                    <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/>
-                    <rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
-                    <rect x="8" y="8" width="40" height="28" fill="#DA7756"/>
-                    <rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
-                    <rect x="16" y="16" width="8" height="8" fill="#2D3436"/>
-                    <rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
-                    <rect x="18" y="18" width="4" height="4" fill="#fff"/>
-                    <rect x="34" y="18" width="4" height="4" fill="#fff"/>
-                    <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/>
-                    <rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
-                    <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
-                  </svg>
+                  <div class="greeting-logo-wrap" style="width:28px;height:28px">
+                    <svg class="greeting-logo" width="28" height="28" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+                      <rect x="24" y="0" width="8" height="4" fill="#FDCB6E"/>
+                      <rect x="26" y="4" width="4" height="4" fill="#B8B8B8"/>
+                      <rect x="8" y="8" width="40" height="28" fill="#DA7756"/>
+                      <rect x="12" y="12" width="32" height="20" fill="#FFF1E0"/>
+                      <rect x="16" y="16" width="8" height="8" fill="#2D3436"/>
+                      <rect x="32" y="16" width="8" height="8" fill="#2D3436"/>
+                      <rect x="18" y="18" width="4" height="4" fill="#fff"/>
+                      <rect x="34" y="18" width="4" height="4" fill="#fff"/>
+                      <rect x="22" y="28" width="12" height="2" fill="#C45E3E"/>
+                      <rect x="18" y="38" width="4" height="8" fill="#B8B8B8"/>
+                      <rect x="34" y="38" width="4" height="8" fill="#B8B8B8"/>
+                    </svg>
+                    <svg class="greeting-feynman-logo" width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <line x1="8" y1="58" x2="32" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                      <line x1="56" y1="58" x2="32" y2="30" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="32" cy="30" r="3.5" fill="currentColor"/>
+                      <path d="M32,30 C26,24 38,18 32,12 C26,6 38,0 32,-4" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
                   <span class="greeting lp-greeting">${timeGreeting}, Steve</span>
                 </div>
                 <div class="chat-composer lp-composer">
@@ -3390,9 +3398,9 @@ function _renderMindsGraph() {
     _tooltipNode = n;
     if (n._isAdd) {
       tooltip.innerHTML = `
-        <div class="tt-name">Discover More Minds</div>
-        <div class="tt-bio">Click to invite new great minds related to the current network.</div>
-        <div class="tt-action">Click to discover →</div>`;
+        <div class="tt-name">Expand the Network</div>
+        <div class="tt-bio">Click to invite new great minds and grow the network.</div>
+        <div class="tt-action">Click to expand →</div>`;
     } else {
       const domains = n.tokens.map(t => `<span class="tt-domain-tag">${t}</span>`).join('');
       const discoverBtn = _expandedSet.has(n.id) ? '' : n._expanding
@@ -3684,7 +3692,7 @@ function showAddMindDialog() {
   overlay.className = 'mind-add-dialog';
   overlay.innerHTML = `
     <div class="mind-add-form">
-      <h3>Invite a Great Mind</h3>
+      <h3>Expand the Network</h3>
       <input type="text" id="add-mind-name" placeholder="Name (e.g., Socrates, Ada Lovelace)" autocomplete="off" />
       <div class="mind-add-actions">
         <button id="add-mind-cancel">Cancel</button>
@@ -3726,8 +3734,8 @@ function showCreateMindDialog() {
   overlay.className = 'mind-add-dialog';
   overlay.innerHTML = `
     <div class="mind-add-form" style="max-width:460px">
-      <h3>Create Your Mind</h3>
-      <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">Paste a Twitter/X profile link, blog URL, or text content to generate a mind agent.</p>
+      <h3>Upload a Mind</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin:0 0 14px">Upload a Twitter/X profile, blog URL, or text content to connect a new mind to the network.</p>
       <input type="text" id="create-mind-name" placeholder="Name" autocomplete="off" />
       <input type="text" id="create-mind-url" placeholder="Twitter/X profile or blog URL (optional)" autocomplete="off" style="margin-top:8px" />
       <textarea id="create-mind-content" placeholder="Or paste text content here — tweets, blog posts, notes, markdown..." rows="5" style="margin-top:8px;width:100%;resize:vertical;font-family:inherit;font-size:13px;padding:10px 12px;border-radius:10px;border:1px solid var(--border-strong);background:var(--bg-chat);color:var(--text)"></textarea>
@@ -3735,7 +3743,7 @@ function showCreateMindDialog() {
       <button type="button" id="create-mind-file-btn" style="margin-top:6px;font-size:12px;color:var(--text-muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0">or upload a .md / .txt file</button>
       <div class="mind-add-actions" style="margin-top:14px">
         <button id="create-mind-cancel">Cancel</button>
-        <button id="create-mind-submit" class="primary-btn">Create Mind</button>
+        <button id="create-mind-submit" class="primary-btn">Upload & Connect</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -3772,7 +3780,7 @@ function showCreateMindDialog() {
     if (!url && !content) { urlInput.focus(); return; }
 
     const btn = overlay.querySelector('#create-mind-submit');
-    btn.textContent = 'Creating...';
+    btn.textContent = 'Connecting...';
     btn.disabled = true;
     try {
       await api('/api/minds/create-from-content', {
@@ -4022,6 +4030,28 @@ async function init() {
 
   navigate();
   ensurePolling();
+  startGreetingIconSwap();
+}
+
+function startGreetingIconSwap() {
+  function scheduleNext() {
+    const delay = 6000 + Math.random() * 12000;
+    setTimeout(() => {
+      const wraps = document.querySelectorAll('.greeting-logo-wrap');
+      wraps.forEach(wrap => {
+        if (wrap.offsetParent === null) return;
+        wrap.classList.add('bounce');
+        setTimeout(() => {
+          wrap.classList.toggle('swap');
+        }, 200);
+        wrap.addEventListener('animationend', () => {
+          wrap.classList.remove('bounce');
+        }, { once: true });
+      });
+      scheduleNext();
+    }, delay);
+  }
+  scheduleNext();
 }
 
 init();
