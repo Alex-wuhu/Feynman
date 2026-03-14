@@ -141,9 +141,7 @@ The design started from a simple insight: Richard Feynman invented [Feynman diag
 
 We explored five directions built on this idea:
 
-<img src="docs/logo-concepts-1.png" alt="Logo concepts 1-2: Classic Feynman Diagram and Book Diagram" />
-<img src="docs/logo-concepts-2.png" alt="Logo concepts 3-4: The F Diagram and Chat Bubble Diagram" />
-<img src="docs/logo-concepts-3.png" alt="Logo concept 5: Minimal Vertex" />
+<img src="docs/logo-concepts.png" alt="Logo design exploration: 5 concepts from Classic Feynman Diagram to the final Minimal Vertex mark" width="800" />
 
 We chose Concept 5 as the starting point — the **人** shape (the Chinese character for "person") — and refined it into the final mark by making the two lines read simultaneously as **a book placed face-down** (covers flaring open, spine at the top). The wavy propagator rising from the vertex is unmistakably a Feynman diagram element — an idea ascending from the point where person meets book.
 
