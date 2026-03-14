@@ -2209,6 +2209,35 @@ body {
   margin: 0;
   text-align: left;
 }
+.lp-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--btn-solid-color);
+  background: var(--btn-solid-bg);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.lp-hero-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  filter: brightness(1.08);
+}
+.lp-hero-cta:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+}
+.lp-hero-cta svg {
+  stroke: currentColor;
+  flex-shrink: 0;
+}
 
 /* Right: Chat card — frosted glass */
 .lp-chat-card {
@@ -2431,6 +2460,7 @@ html.dark .lp-chat-card {
   .lp-hero-left::before { inset: -30px -40px; }
   .lp-hero-headline { font-size: 22px; text-align: center; }
   .lp-hero-sub { text-align: center; }
+  .lp-hero-cta { margin: 20px auto 0; }
   .lp-chat-card { flex: 0 0 auto; max-width: 100%; height: 380px; }
   .lp-minds-toolbar-btn { display: none; }
   .lp-minds-toolbar input { width: 140px; }

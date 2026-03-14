@@ -683,20 +683,57 @@ def add_mind_memory(mind_id: str, summary: str, topic: str = "", user_id: str | 
 
 
 def list_mind_memories(mind_id: str, user_id: str | None = None, limit: int = 20) -> list[dict[str, Any]]:
+    """Return memories for a mind.
+
+    Privacy model:
+    - Private memories (user_id matches): return full summary + topic.
+    - Global topic tags (user_id IS NULL): return topic ONLY (no summary) to
+      prevent leaking specific conversation content across users.
+    """
     with get_conn() as conn:
         if user_id:
-            rows = _fetchall(conn, _q(
-                """SELECT summary, topic, created_at FROM mind_memories
-                   WHERE mind_id = ? AND (user_id IS NULL OR user_id = ?)
+            private = _fetchall(conn, _q(
+                """SELECT summary, topic, created_at, user_id FROM mind_memories
+                   WHERE mind_id = ? AND user_id = ?
                    ORDER BY created_at DESC LIMIT ?"""
             ), (mind_id, user_id, limit))
-        else:
-            rows = _fetchall(conn, _q(
-                """SELECT summary, topic, created_at FROM mind_memories
-                   WHERE mind_id = ? AND user_id IS NULL
+            global_tags = _fetchall(conn, _q(
+                """SELECT topic, created_at FROM mind_memories
+                   WHERE mind_id = ? AND user_id IS NULL AND topic != ''
                    ORDER BY created_at DESC LIMIT ?"""
             ), (mind_id, limit))
-        return rows
+            rows = list(private)
+            for g in global_tags:
+                rows.append({"summary": "", "topic": g["topic"],
+                             "created_at": g["created_at"], "user_id": None})
+            return rows
+        else:
+            rows = _fetchall(conn, _q(
+                """SELECT topic, created_at FROM mind_memories
+                   WHERE mind_id = ? AND user_id IS NULL AND topic != ''
+                   ORDER BY created_at DESC LIMIT ?"""
+            ), (mind_id, limit))
+            return [{"summary": "", "topic": r["topic"],
+                     "created_at": r["created_at"], "user_id": None} for r in rows]
+
+
+def list_user_interest_profile(user_id: str, limit: int = 50) -> list[dict[str, Any]]:
+    """Return aggregated topic tags for a user across all minds.
+
+    Returns only anonymized topics — never conversation summaries.
+    Useful for building user interest profiles and future user-matching.
+    """
+    with get_conn() as conn:
+        rows = _fetchall(conn, _q(
+            """SELECT topic, mind_id, COUNT(*) as freq
+               FROM mind_memories
+               WHERE user_id = ? AND topic != ''
+               GROUP BY topic, mind_id
+               ORDER BY freq DESC, topic ASC
+               LIMIT ?"""
+        ), (user_id, limit))
+        return [{"topic": r["topic"], "mind_id": r["mind_id"],
+                 "frequency": r["freq"]} for r in rows]
 
 
 # ─── Chat sessions ───

@@ -383,15 +383,16 @@ def build_mind_system_prompt(
         "- Respond in the same language as the user's question.\n"
     )
 
-    # Layer 4: Memory
+    # Layer 4: Memory (privacy-aware)
     if memories:
-        global_mems = [m for m in memories if not m.get("user_id")]
-        user_mems = [m for m in memories if m.get("user_id")]
-        if global_mems:
-            summaries = "; ".join(m["summary"] for m in global_mems[:10])
-            prompt += f"\nYou have previously discussed: {summaries}\n"
+        global_topics = [m["topic"] for m in memories
+                         if not m.get("user_id") and m.get("topic")]
+        user_mems = [m for m in memories if m.get("user_id") and m.get("summary")]
+        if global_topics:
+            topics = "; ".join(dict.fromkeys(global_topics).keys())
+            prompt += f"\nTopics you have been asked about broadly: {topics}\n"
         if user_mems:
-            summaries = "; ".join(m["summary"] for m in user_mems[:5])
+            summaries = "; ".join(m["summary"] for m in user_mems[:10])
             prompt += f"\nWith this person specifically, you discussed: {summaries}\n"
 
     return prompt
@@ -521,24 +522,37 @@ def panel_chat(
 def extract_and_save_memory(
     mind_id: str, message: str, response: str, user_id: str | None = None
 ) -> None:
-    """Extract a brief memory summary from a conversation turn and save it."""
+    """Extract memory from a conversation turn.
+
+    Saves two types:
+    - Private memory (with user_id): full conversation summary, only visible to that user.
+    - Global topic tag (without user_id): anonymized topic keyword only, safe to share
+      across users. Useful for mind's knowledge of popular topics and future user matching.
+    """
     prompt = (
-        "Summarize this conversation exchange in 1-2 sentences, focusing on the "
-        "key intellectual point discussed:\n\n"
+        "Analyze this conversation and return a JSON object with two fields:\n"
+        "1. \"summary\": 1-2 sentence summary of the intellectual point discussed\n"
+        "2. \"topic\": a short topic tag (2-5 words, e.g. \"free will and determinism\")\n\n"
         f"User: {message}\n\nResponse: {response}\n\n"
-        "Return ONLY the summary sentence(s), nothing else."
+        "Return ONLY the JSON object, nothing else."
     )
     try:
         result, _ = chat_with_fallback(
-            system="You are a concise summarizer.",
+            system="You are a concise summarizer. Return only valid JSON.",
             user=prompt,
         )
-        summary = result.content.strip()
+        text = result.content.strip()
+        if text.startswith("```"):
+            text = re.sub(r"^```\w*\n?", "", text)
+            text = re.sub(r"\n?```$", "", text)
+        data = json.loads(text)
+        summary = data.get("summary", "").strip()
+        topic = data.get("topic", "").strip()
+
         if summary:
-            add_mind_memory(mind_id, summary, user_id=user_id)
-            # Also add a global memory (without user_id)
-            if user_id:
-                add_mind_memory(mind_id, summary)
+            add_mind_memory(mind_id, summary, topic=topic, user_id=user_id)
+        if topic and user_id:
+            add_mind_memory(mind_id, topic, topic=topic)
     except Exception as exc:
         log.warning("Memory extraction failed for mind %s: %s", mind_id, exc)
 

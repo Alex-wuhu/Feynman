@@ -45,6 +45,7 @@ from .core.db import (
     list_minds,
     list_questions,
     list_session_messages,
+    list_user_interest_profile,
     list_votes,
     update_agent_meta,
     update_agent_status,
@@ -1069,6 +1070,16 @@ def api_add_session_message(session_id: str, payload: AddSessionMessageRequest) 
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     return add_session_message(session_id, role=payload.role, content=payload.content, meta=payload.meta)
+
+
+# ─── User interest profile (for future user matching) ───
+
+@app.get("/api/users/{user_id}/interests")
+def api_user_interests(user_id: str, request: Request) -> list[dict[str, Any]]:
+    req_user = getattr(request.state, "user_id", None)
+    if req_user and req_user != user_id:
+        raise HTTPException(status_code=403, detail="Cannot view another user's profile")
+    return list_user_interest_profile(user_id)
 
 
 # ─── Vote endpoints (with auto-creation threshold) ───

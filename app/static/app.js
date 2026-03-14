@@ -678,6 +678,7 @@ function renderLandingPage() {
           <div class="lp-hero-left">
             <h1 class="lp-hero-headline">Chat with books.<br>Great minds join in.</h1>
             <p class="lp-hero-sub">Turn any book into a conversation that goes beyond the page, or start from a topic to learn across all relevant books with a library that auto-grows as books are mentioned. An evolving network of agent-simulated great minds joins the discussion along the way.</p>
+            <button class="lp-hero-cta" id="lp-hero-cta">${window.FEYNMAN_PRO ? 'Get Started Free' : 'Start Exploring'}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
           </div>
           <div class="lp-chat-card">
             <div class="lp-chat-home" id="lp-chat-home">
@@ -751,14 +752,16 @@ function renderLandingPage() {
       </section>
     </div>`;
 
-  document.getElementById('lp-get-started').addEventListener('click', () => {
+  const _lpCtaHandler = () => {
     if (window.FEYNMAN_PRO) {
       window.location.hash = currentUser ? '#/' : '#/login';
     } else {
       localStorage.setItem('feynman-landed', '1');
       window.location.hash = '#/';
     }
-  });
+  };
+  document.getElementById('lp-get-started').addEventListener('click', _lpCtaHandler);
+  document.getElementById('lp-hero-cta').addEventListener('click', _lpCtaHandler);
 
   document.getElementById('lp-theme-toggle').addEventListener('click', () => {
     const isCurrentlyDark = _isDarkMode();
@@ -2167,6 +2170,8 @@ function hideChatRightSidebar() {
 
 // ─── Global chat ───
 let pendingHomeMessage = null;
+let _inflightSessionId = null;
+let _chatRenderGen = 0; // bumped each time onChatPageShow re-renders the chat box
 
 async function sendGlobalChat(message) {
   const chatBox = document.getElementById('chat-messages');
@@ -2184,8 +2189,10 @@ async function sendGlobalChat(message) {
   appendMsg(chatBox, 'user', message);
   showLoading(chatBox);
 
-  // Save user message to DB
-  _saveMessageToDB(sentSessionId, 'user', message);
+  await _saveMessageToDB(sentSessionId, 'user', message);
+
+  _inflightSessionId = sentSessionId;
+  const renderGenAtStart = _chatRenderGen;
 
   try {
     const body = { message };
@@ -2200,7 +2207,6 @@ async function sendGlobalChat(message) {
       body.book_context = bookContext;
     }
 
-    // Collect conversation history from in-memory session
     const session = chatSessions.find(s => s.id === sentSessionId);
     const history = (session?.messages || [])
       .filter(m => m.role === 'user' || m.role === 'assistant')
@@ -2220,19 +2226,18 @@ async function sendGlobalChat(message) {
     if (data.references?.length) msgOpts.references = data.references;
     if (data.usage) msgOpts.usage = data.usage;
 
-    // Save assistant message to DB
     const assistMeta = {};
     if (sources.length) assistMeta.sources = sources;
     if (Object.keys(msgOpts).length) assistMeta.opts = msgOpts;
-    _saveMessageToDB(sentSessionId, 'assistant', data.answer, assistMeta);
+    await _saveMessageToDB(sentSessionId, 'assistant', data.answer, assistMeta);
 
-    // If user switched sessions while waiting, update in-memory only
-    if (currentSessionId !== sentSessionId) {
-      if (session) {
-        session.messages.push({ role: 'assistant', content: data.answer, sources, opts: msgOpts });
-      }
-      return;
-    }
+    _inflightSessionId = null;
+
+    // If user left & returned (re-render happened), onChatPageShow already
+    // rendered messages from memory (which now includes the assistant reply).
+    if (_chatRenderGen !== renderGenAtStart) return;
+
+    if (currentSessionId !== sentSessionId || getRoute().page !== 'chat') return;
 
     removeLoading();
     appendMsg(chatBox, 'assistant', data.answer, sources, msgOpts);
@@ -2243,7 +2248,9 @@ async function sendGlobalChat(message) {
 
     _inviteMindsToChat(chatBox, message, bookContext, agentIds);
   } catch (err) {
+    _inflightSessionId = null;
     if (currentSessionId !== sentSessionId) return;
+    if (_chatRenderGen !== renderGenAtStart) return;
     removeLoading();
     const msg = err.message.includes('No available provider')
       ? 'No LLM API key configured. Please add GEMINI_API_KEY, OPENAI_API_KEY, or KIMI_API_KEY to your .env file and restart the server.'
@@ -2252,16 +2259,22 @@ async function sendGlobalChat(message) {
   }
 }
 
-function _saveMessageToDB(sessionId, role, content, meta) {
+async function _saveMessageToDB(sessionId, role, content, meta) {
   const body = { role, content: content || '' };
   if (meta && Object.keys(meta).length) body.meta = meta;
-  api(`/api/sessions/${sessionId}/messages`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }).then(() => {
+  try {
+    await api(`/api/sessions/${sessionId}/messages`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
     const session = chatSessions.find(s => s.id === sessionId);
-    if (session) session.messages.push({ role, content, ...meta });
-  }).catch(e => console.warn('Failed to save message:', e));
+    if (session) {
+      if (!session.messages) session.messages = [];
+      session.messages.push({ role, content, ...meta });
+    }
+  } catch (e) {
+    console.warn('Failed to save message:', e);
+  }
 }
 
 let _mindsInvitedOnce = false;
@@ -2388,36 +2401,44 @@ function handleChatSend() {
 async function onChatPageShow() {
   renderSelectedChips();
   renderChatHistory();
-  // Restore messages if chat box is empty and we have a current session
-  const chatBox = document.getElementById('chat-messages');
-  if (currentSessionId && !chatBox.children.length) {
-    const session = chatSessions.find(s => s.id === currentSessionId);
-    // Load from DB if not cached in memory
-    if (session && !session.messages?.length) {
-      try {
-        const msgs = await api(`/api/sessions/${currentSessionId}/messages`);
-        session.messages = msgs.map(m => ({ role: m.role, content: m.content, ...m.meta }));
-      } catch (e) {
-        console.warn('Failed to load session messages:', e);
-      }
-    }
-    if (session?.messages?.length) {
-      for (const m of session.messages) {
-        if (m.role === 'mind') {
-          appendMindMsg(chatBox, m.mindName, m.content);
-        } else if (m.role === 'system-notice') {
-          appendJoinNotice(chatBox, m.mindNames || []);
-        } else {
-          appendMsg(chatBox, m.role, m.content, m.sources, m.opts);
-        }
-      }
-      restoreChatSidebar(session.messages);
-    }
-  }
+
   if (pendingHomeMessage) {
     const msg = pendingHomeMessage;
     pendingHomeMessage = null;
     setTimeout(() => sendGlobalChat(msg), 50);
+    return;
+  }
+
+  const chatBox = document.getElementById('chat-messages');
+  if (!currentSessionId) return;
+
+  const session = chatSessions.find(s => s.id === currentSessionId);
+
+  if (session && !session.messages?.length) {
+    try {
+      const msgs = await api(`/api/sessions/${currentSessionId}/messages`);
+      session.messages = msgs.map(m => ({ role: m.role, content: m.content, ...m.meta }));
+    } catch (e) {
+      console.warn('Failed to load session messages:', e);
+    }
+  }
+
+  chatBox.innerHTML = '';
+  if (session?.messages?.length) {
+    for (const m of session.messages) {
+      if (m.role === 'mind') {
+        appendMindMsg(chatBox, m.mindName, m.content);
+      } else if (m.role === 'system-notice') {
+        appendJoinNotice(chatBox, m.mindNames || []);
+      } else {
+        appendMsg(chatBox, m.role, m.content, m.sources, m.opts);
+      }
+    }
+    restoreChatSidebar(session.messages);
+  }
+
+  if (_inflightSessionId === currentSessionId) {
+    showLoading(chatBox);
   }
 }
 
