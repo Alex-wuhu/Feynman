@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feynman Logo — All Original Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f7f4;
+    --card: #fff;
+    --border: #e8e6e1;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --accent: #0066cc;
+    --tag-bg: #f0eeea;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 48px 40px 80px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+    max-width: 680px;
+    line-height: 1.6;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 28px;
+    max-width: 1200px;
+  }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .card.highlight {
+    border: 2px solid var(--accent);
+    position: relative;
+  }
+  .card.highlight::after {
+    content: attr(data-badge);
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+  .card.final {
+    border: 2px solid #34c759;
+    position: relative;
+  }
+  .card.final::after {
+    content: 'SELECTED FINAL';
+    position: absolute;
+    top: -10px;
+    right: 16px;
+    background: #34c759;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 10px;
+    letter-spacing: 0.05em;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .card-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: #1d1d1f;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .preview-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+    padding: 28px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.04);
+    background: #fafafa;
+    margin: 16px 0;
+  }
+  .preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .size-label {
+    font-size: 10px;
+    color: #999;
+  }
+  .desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #4a4a4f;
+  }
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .tag.iconic { background: #e8f2fe; color: #0071e3; }
+  .tag.narrative { background: #e3f8f0; color: #15803d; }
+  .tag.recommended { background: #fef3cd; color: #92400e; }
+  .tag.conversational { background: #fce7f3; color: #9d174d; }
+  .tag.default { background: #f0eeea; color: var(--muted); }
+</style>
+</head>
+<body>
+<h1>Feynman Logo — All Original Concepts</h1>
+<p class="subtitle">From earliest explorations to final selection — Feynman diagrams as visual identity</p>
+
+<div class="grid">
+
+  <!-- Concept 1 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">1</span>
+      <span class="card-title">Classic Feynman Diagram</span>
+    </div>
+    <span class="tag iconic">Iconic</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-1-feynman-diagram.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-1-feynman-diagram.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">Two particles meet at vertices connected by a wavy propagator — the classic Feynman diagram representing knowledge exchange.</p>
+  </div>
+
+  <!-- Concept 2 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">2</span>
+      <span class="card-title">Book + Diagram</span>
+    </div>
+    <span class="tag narrative">Narrative</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-2-book-diagram.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-2-book-diagram.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">Open book at bottom with branching paths upward to mind dots. Book as the root of knowledge, wavy propagator rising from vertex.</p>
+  </div>
+
+  <!-- Concept 3 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">3</span>
+      <span class="card-title">Mind Network</span>
+    </div>
+    <span class="tag recommended">Recommended</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-3-mind-network.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-3-mind-network.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">Vertical timeline with branching interactions — a conversation flow with wavy and straight propagators at different vertices.</p>
+  </div>
+
+  <!-- Concept 4 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">4</span>
+      <span class="card-title">Chat Diagram</span>
+    </div>
+    <span class="tag conversational">Conversational</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-4-chat-diagram.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-4-chat-diagram.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">Feynman diagram inside a chat bubble — knowledge exchange happening within conversation.</p>
+  </div>
+
+  <!-- Concept 5 -->
+  <div class="card highlight" data-badge="YOU SAID: LOOKS LIKE 人">
+    <div class="card-header">
+      <span class="card-num">5</span>
+      <span class="card-title">人 (Vertex Person)</span>
+    </div>
+    <span class="tag iconic">人 Person</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-5-vertex.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-5-vertex.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-5-vertex.svg" width="16" height="16">
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <p class="desc"><strong>The one you said looks like 人 (a person)!</strong> Two legs form the 人 shape, vertex dot at the hip, wavy propagator rises upward = thought ascending. Small arrow feet suggest motion/direction.</p>
+  </div>
+
+  <!-- Concept 6 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">6</span>
+      <span class="card-title">人 + Book Fusion</span>
+    </div>
+    <span class="tag narrative">Fusion</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-6-fusion.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-6-fusion.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">人 legs with book-page curves at the feet — person standing on an open book. Wavy propagator rising from vertex.</p>
+  </div>
+
+  <!-- Concept 7 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">7</span>
+      <span class="card-title">Tree Person</span>
+    </div>
+    <span class="tag narrative">Branching</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-7-tree-person.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-7-tree-person.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">人 legs with book curves, two wavy branches diverging upward to "mind dots" — a tree of knowledge whose fruits are ideas.</p>
+  </div>
+
+  <!-- Concept 8 — SELECTED FINAL -->
+  <div class="card final">
+    <div class="card-header">
+      <span class="card-num">8</span>
+      <span class="card-title">Pure Person + Idea (Elegant)</span>
+    </div>
+    <span class="tag recommended">Selected Final</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-8-elegant.svg" width="80" height="80">
+        <span class="size-label">80px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-8-elegant.svg" width="40" height="40">
+        <span class="size-label">40px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-8-elegant.svg" width="24" height="24">
+        <span class="size-label">24px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-8-elegant.svg" width="16" height="16">
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+    <p class="desc">The purest form — just a person silhouette (wide stance), a vertex dot, and a wavy propagator rising upward. Three elements, nothing else. Maximum clarity at every size. <strong>This is the final selected logo and current favicon.</strong></p>
+  </div>
+
+  <!-- Concept 9 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-num">9</span>
+      <span class="card-title">Rooted Learner</span>
+    </div>
+    <span class="tag narrative">Layered</span>
+    <div class="preview-row">
+      <div class="preview-item">
+        <img src="logo-concept-9-rooted.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="preview-item">
+        <img src="logo-concept-9-rooted.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+    </div>
+    <p class="desc">Three-layer story: open book at bottom, a person standing on it, wavy propagator rising to a mind dot. Grounded in books, ideas ascending.</p>
+  </div>
+
+
+</div>
+
+</body>
+</html>

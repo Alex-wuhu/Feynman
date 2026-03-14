@@ -139,13 +139,50 @@ The system auto-selects the best available provider and falls back through the c
 
 The design started from a simple insight: Richard Feynman invented [Feynman diagrams](https://en.wikipedia.org/wiki/Feynman_diagram) — particle interaction diagrams where lines meet at vertices and wavy propagators carry forces between them. That visual language maps perfectly onto what this product does: minds meeting, exchanging knowledge, and leaving enriched.
 
-We explored five directions built on this idea:
+We explored several directions built on this idea:
 
-<img src="docs/logo-concepts.png" alt="Logo design exploration: 5 concepts from Classic Feynman Diagram to the final Minimal Vertex mark" width="800" />
+<table>
+<tr>
+<td align="center" width="50%">
+<strong>1 — Classic Feynman Diagram</strong><br><br>
+<img src="app/static/logo-concept-1-feynman-diagram.svg" width="64" height="64"><br>
+<sub>Two vertices connected by a wavy propagator</sub>
+</td>
+<td align="center" width="50%">
+<strong>2 — Book → Diagram</strong><br><br>
+<img src="app/static/logo-concept-2-book-diagram.svg" width="64" height="64"><br>
+<sub>Open book whose spine becomes a vertex</sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>3 — The "F" Diagram</strong><br><br>
+<img src="app/static/logo-concept-3-mind-network.svg" width="64" height="64"><br>
+<sub>The letter F built from diagram elements</sub>
+</td>
+<td align="center">
+<strong>4 — Chat Bubble Diagram</strong><br><br>
+<img src="app/static/logo-concept-4-chat-diagram.svg" width="64" height="64"><br>
+<sub>Feynman diagram inside a speech bubble</sub>
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>5 — Vertex Person</strong><br><br>
+<img src="app/static/logo-concept-5-vertex.svg" width="64" height="64"><br>
+<sub>The 人 (person) shape with wavy propagator</sub>
+</td>
+<td align="center">
+<strong>8 — Pure Person + Idea ✓</strong><br><br>
+<img src="app/static/logo-concept-8-elegant.svg" width="64" height="64"><br>
+<sub><strong>Selected</strong> — person, vertex dot, wavy propagator</sub>
+</td>
+</tr>
+</table>
 
-We chose Concept 5 — the **Minimal Vertex**. Two fermion lines converge from below, forming **人** (the Chinese character for "person"). A wavy propagator rises upward like an idea ascending. It's the simplest possible Feynman diagram: one vertex, one moment of interaction where person meets knowledge.
+We chose Concept 8 — the purest form of the **人** shape (the Chinese character for "person"): just two lines forming a wide stance, a vertex dot, and a single wavy propagator rising upward. Three elements, nothing else. It reads as person, book, tree of knowledge, and Feynman diagram — four meanings in one mark, with maximum clarity at every size.
 
-All concept SVGs are included in `app/static/` — run the app and visit `/static/logo-preview.html` to preview them interactively.
+All concept SVGs are included in `app/static/` — run the app and visit `/static/logo-all-concepts.html` to preview them interactively.
 
 ## Product Updates
 

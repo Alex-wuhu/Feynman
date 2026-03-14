@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <circle cx="32" cy="36" r="3.5" fill="#e5e5e7"/>
-  <line x1="10" y1="56" x2="32" y2="36" fill="none" stroke="#e5e5e7" stroke-width="3" stroke-linecap="round"/>
-  <line x1="32" y1="36" x2="54" y2="56" fill="none" stroke="#e5e5e7" stroke-width="3" stroke-linecap="round"/>
-  <path d="M32,36 C27,30 37,24 32,18 C27,12 37,6 32,2" fill="none" stroke="#e5e5e7" stroke-width="3" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 68" width="64" height="68">
+  <path d="M32,30 L8,56 Q4,60 6,62" fill="none" stroke="#e5e5e7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32,30 L56,56 Q60,60 58,62" fill="none" stroke="#e5e5e7" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="32" y1="30" x2="32" y2="36" stroke="#e5e5e7" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="32" cy="30" r="3.5" fill="#e5e5e7"/>
+  <path d="M32,30 C26,24 38,18 32,12 C26,6 38,0 32,-4" fill="none" stroke="#e5e5e7" stroke-width="2.8" stroke-linecap="round"/>
 </svg>
