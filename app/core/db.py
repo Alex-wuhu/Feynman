@@ -142,7 +142,6 @@ def init_db() -> None:
                     created_at TEXT NOT NULL
                 )
             """)
-            _execute(conn, "CREATE INDEX IF NOT EXISTS idx_agents_user ON agents(user_id)")
             _execute(conn, """
                 CREATE TABLE IF NOT EXISTS chunks (
                     id TEXT PRIMARY KEY,
@@ -251,7 +250,6 @@ def init_db() -> None:
             try:
                 _execute(conn, "SAVEPOINT sp_chat_sessions_uid")
                 _execute(conn, "ALTER TABLE chat_sessions ADD COLUMN user_id TEXT")
-                _execute(conn, "CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id)")
                 _execute(conn, """
                     DELETE FROM session_messages WHERE session_id IN (
                         SELECT id FROM chat_sessions WHERE user_id IS NULL
@@ -261,25 +259,26 @@ def init_db() -> None:
                 _execute(conn, "RELEASE SAVEPOINT sp_chat_sessions_uid")
             except Exception:
                 _execute(conn, "ROLLBACK TO SAVEPOINT sp_chat_sessions_uid")
+            _execute(conn, "CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id)")
 
             # Migration: add user_id to messages table
             try:
                 _execute(conn, "SAVEPOINT sp_messages_uid")
                 _execute(conn, "ALTER TABLE messages ADD COLUMN user_id TEXT")
-                _execute(conn, "CREATE INDEX IF NOT EXISTS idx_messages_user ON messages(agent_id, user_id)")
                 _execute(conn, "DELETE FROM messages WHERE user_id IS NULL")
                 _execute(conn, "RELEASE SAVEPOINT sp_messages_uid")
             except Exception:
                 _execute(conn, "ROLLBACK TO SAVEPOINT sp_messages_uid")
+            _execute(conn, "CREATE INDEX IF NOT EXISTS idx_messages_user ON messages(agent_id, user_id)")
 
             # Migration: add user_id and is_deleted to agents table
             try:
                 _execute(conn, "SAVEPOINT sp_agents_uid")
                 _execute(conn, "ALTER TABLE agents ADD COLUMN user_id TEXT")
-                _execute(conn, "CREATE INDEX IF NOT EXISTS idx_agents_user ON agents(user_id)")
                 _execute(conn, "RELEASE SAVEPOINT sp_agents_uid")
             except Exception:
                 _execute(conn, "ROLLBACK TO SAVEPOINT sp_agents_uid")
+            _execute(conn, "CREATE INDEX IF NOT EXISTS idx_agents_user ON agents(user_id)")
             try:
                 _execute(conn, "SAVEPOINT sp_agents_del")
                 _execute(conn, "ALTER TABLE agents ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE")
@@ -325,7 +324,6 @@ def init_db() -> None:
                     created_at TEXT NOT NULL
                 )
             """)
-            _execute(conn, "CREATE INDEX IF NOT EXISTS idx_agents_user ON agents(user_id)")
             _execute(conn, """
                 CREATE TABLE IF NOT EXISTS chunks (
                     id TEXT PRIMARY KEY,
