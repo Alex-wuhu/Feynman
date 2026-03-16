@@ -59,9 +59,9 @@ def main():
             """, (r["id"], r["agent_id"], r["chunk_index"], r["text"],
                   psycopg2.Binary(r["vector"]), r["dim"], r["norm"]))
 
-        # Messages
+        # Messages (legacy table — also kept for reference)
         rows = sq.execute("SELECT * FROM messages").fetchall()
-        print(f"Migrating {len(rows)} messages...")
+        print(f"Migrating {len(rows)} messages (legacy table)...")
         for r in rows:
             user_id = r["user_id"] if "user_id" in r.keys() else None
             cur.execute("""

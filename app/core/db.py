@@ -536,6 +536,15 @@ def init_db() -> None:
             # Cleanup: purge usage records older than 30 days (must run after table creation)
             _execute(conn, "DELETE FROM usage WHERE created_at < datetime('now', '-30 days')")
 
+    # Migration: copy legacy messages → session_messages (runs once, idempotent)
+    try:
+        count = migrate_messages_to_sessions()
+        if count:
+            import logging as _log
+            _log.getLogger(__name__).info("Migrated %d messages to session_messages", count)
+    except Exception:
+        pass
+
 
 def create_agent(name: str, agent_type: str, source: str | None, meta: dict[str, Any], user_id: str | None = None) -> str:
     agent_id = str(uuid.uuid4())
@@ -613,22 +622,50 @@ def get_chunks(agent_id: str) -> list[dict[str, Any]]:
         ), (agent_id,))
 
 
+def _get_or_create_book_session(agent_id: str, user_id: str) -> str:
+    """Find or create a book-type chat session for the given agent + user."""
+    with get_conn() as conn:
+        row = _fetchone(conn, _q(
+            "SELECT id FROM chat_sessions WHERE session_type = 'book' AND mind_id = ? AND user_id = ?"
+        ), (agent_id, user_id))
+        if row:
+            return row["id"]
+        session_id = str(uuid.uuid4())
+        now = _utcnow()
+        agent = _fetchone(conn, _q("SELECT name FROM agents WHERE id = ?"), (agent_id,))
+        title = agent["name"] if agent else "Book Chat"
+        _execute(conn, _q(
+            "INSERT INTO chat_sessions (id, user_id, title, session_type, mind_id, meta_json, updated_at, created_at) VALUES (?, ?, ?, 'book', ?, ?, ?, ?)"
+        ), (session_id, user_id, title, agent_id, json.dumps({"agent_id": agent_id}), now, now))
+        return session_id
+
+
 def add_message(agent_id: str, role: str, content: str, user_id: str | None = None) -> None:
     if not user_id:
         return
+    session_id = _get_or_create_book_session(agent_id, user_id)
     with get_conn() as conn:
+        msg_id = str(uuid.uuid4())
+        now = _utcnow()
         _execute(conn, _q(
-            "INSERT INTO messages (id, agent_id, user_id, role, content, created_at) VALUES (?, ?, ?, ?, ?, ?)"
-        ), (str(uuid.uuid4()), agent_id, user_id, role, content, _utcnow()))
+            "INSERT INTO session_messages (id, session_id, role, content, meta_json, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+        ), (msg_id, session_id, role, content, json.dumps({}), now))
+        _execute(conn, _q("UPDATE chat_sessions SET updated_at = ? WHERE id = ?"),
+                 (now, session_id))
 
 
 def list_messages(agent_id: str, limit: int = 50, user_id: str | None = None) -> list[dict[str, Any]]:
     if not user_id:
         return []
     with get_conn() as conn:
+        row = _fetchone(conn, _q(
+            "SELECT id FROM chat_sessions WHERE session_type = 'book' AND mind_id = ? AND user_id = ?"
+        ), (agent_id, user_id))
+        if not row:
+            return []
         rows = _fetchall(conn, _q(
-            "SELECT role, content, created_at FROM messages WHERE agent_id = ? AND user_id = ? ORDER BY created_at DESC LIMIT ?"
-        ), (agent_id, user_id, limit))
+            "SELECT role, content, created_at FROM session_messages WHERE session_id = ? ORDER BY created_at DESC LIMIT ?"
+        ), (row["id"], limit))
         return list(reversed(rows))
 
 
@@ -1083,3 +1120,46 @@ def count_usage_today(user_id: str, action: str) -> int:
             AND created_at >= CURRENT_DATE
         """), (user_id, action))
         return row["cnt"] if row else 0
+
+
+def migrate_messages_to_sessions() -> int:
+    """One-time migration: copy messages rows into session_messages via book sessions.
+
+    Groups messages by (agent_id, user_id), creates a book session for each group,
+    then copies messages into session_messages preserving created_at order.
+    Returns the number of messages migrated. Skips if already migrated.
+    """
+    with get_conn() as conn:
+        groups = _fetchall(conn, _q(
+            "SELECT DISTINCT agent_id, user_id FROM messages WHERE user_id IS NOT NULL"
+        ))
+        if not groups:
+            return 0
+
+        migrated = 0
+        for g in groups:
+            agent_id, user_id = g["agent_id"], g["user_id"]
+            existing = _fetchone(conn, _q(
+                "SELECT id FROM chat_sessions WHERE session_type = 'book' AND mind_id = ? AND user_id = ?"
+            ), (agent_id, user_id))
+            if existing:
+                continue
+
+            session_id = str(uuid.uuid4())
+            now = _utcnow()
+            agent = _fetchone(conn, _q("SELECT name FROM agents WHERE id = ?"), (agent_id,))
+            title = agent["name"] if agent else "Book Chat"
+            _execute(conn, _q(
+                "INSERT INTO chat_sessions (id, user_id, title, session_type, mind_id, meta_json, updated_at, created_at) VALUES (?, ?, ?, 'book', ?, ?, ?, ?)"
+            ), (session_id, user_id, title, agent_id, json.dumps({"agent_id": agent_id}), now, now))
+
+            msgs = _fetchall(conn, _q(
+                "SELECT id, role, content, created_at FROM messages WHERE agent_id = ? AND user_id = ? ORDER BY created_at ASC"
+            ), (agent_id, user_id))
+            for m in msgs:
+                _execute(conn, _q(
+                    "INSERT INTO session_messages (id, session_id, role, content, meta_json, created_at) VALUES (?, ?, ?, ?, ?, ?)"
+                ), (str(uuid.uuid4()), session_id, m["role"], m["content"], json.dumps({}), m["created_at"]))
+                migrated += 1
+
+        return migrated

@@ -2016,6 +2016,7 @@ async function restoreSessions() {
       activeMinds: new Map(Object.entries(s.meta?.activeMinds || {})),
       updatedAt: new Date(s.updated_at).getTime(),
       mindId: s.mind_id || null,
+      sessionType: s.session_type || 'chat',
     }));
     // Migrate from localStorage if DB is empty but localStorage has data
     if (!chatSessions.length) {
@@ -2099,6 +2100,10 @@ async function switchToSession(id) {
   currentSessionId = id;
   localStorage.setItem('currentSessionId', currentSessionId);
 
+  if (session.sessionType === 'book') {
+    window.location.hash = '#/book/' + session.mindId;
+    return;
+  }
   if (session.mindId) {
     window.location.hash = '#/mind/' + session.mindId;
     return;
@@ -2201,16 +2206,18 @@ function _renderChatsList(query) {
   emptyEl.classList.add('hidden');
   const chatIcon = `<svg class="chat-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
   const mindIcon = `<svg class="chat-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><line x1="9" y1="6" x2="15" y2="6"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="18" y1="9" x2="18" y2="15"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="9" y1="8" x2="15" y2="16"/></svg>`;
-  listEl.innerHTML = sessions.map(s =>
-    `<div class="chats-list-item" data-sid="${s.id}">
-      ${s.mindId ? mindIcon : chatIcon}
+  const bookIcon = `<svg class="chat-item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
+  listEl.innerHTML = sessions.map(s => {
+    const icon = s.sessionType === 'book' ? bookIcon : (s.mindId ? mindIcon : chatIcon);
+    return `<div class="chats-list-item" data-sid="${s.id}">
+      ${icon}
       <div class="chats-item-body">
         <div class="chat-item-title">${esc(s.title)}</div>
         ${s.updatedAt ? `<div class="chats-item-time">Last message ${timeAgo(s.updatedAt)}</div>` : ''}
       </div>
       <button class="chats-delete-btn" title="Delete">&times;</button>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
   listEl.querySelectorAll('.chats-list-item').forEach(el => {
     el.addEventListener('click', (e) => {
       if (e.target.closest('.chats-delete-btn')) return;
