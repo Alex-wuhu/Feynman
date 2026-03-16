@@ -3813,22 +3813,27 @@ function _renderMindsGraph() {
       const s = fl.link.source, t = fl.link.target;
       if (!s || !t || s.x == null || t.x == null) continue;
       const fade = Math.max(0, 1 - elapsed / FLASH_DURATION);
+      const sc = _hexToRgb(s.color || '#6488c8');
+      const tc = _hexToRgb(t.color || '#6488c8');
+      const mc = [(sc[0]+tc[0])>>1, (sc[1]+tc[1])>>1, (sc[2]+tc[2])>>1];
 
       ctx.beginPath();
       ctx.moveTo(s.x, s.y);
       ctx.lineTo(t.x, t.y);
-      ctx.strokeStyle = `rgba(255,255,255,${fade * 0.35})`;
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = `rgba(${mc[0]},${mc[1]},${mc[2]},${fade * 0.6})`;
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      const dotT = (elapsed * 0.0015) % 1;
-      const dx = s.x + (t.x - s.x) * dotT;
-      const dy = s.y + (t.y - s.y) * dotT;
-      const dotGrad = ctx.createRadialGradient(dx, dy, 0, dx, dy, 4);
-      dotGrad.addColorStop(0, `rgba(255,255,255,${fade * 0.8})`);
-      dotGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      const dotT = (elapsed * 0.0012) % 1;
+      const bx = s.x + (t.x - s.x) * dotT;
+      const by = s.y + (t.y - s.y) * dotT;
+      const dotR = 6;
+      const dotGrad = ctx.createRadialGradient(bx, by, 0, bx, by, dotR);
+      dotGrad.addColorStop(0, `rgba(255,255,255,${fade * 0.9})`);
+      dotGrad.addColorStop(0.5, `rgba(${mc[0]},${mc[1]},${mc[2]},${fade * 0.5})`);
+      dotGrad.addColorStop(1, `rgba(${mc[0]},${mc[1]},${mc[2]},0)`);
       ctx.beginPath();
-      ctx.arc(dx, dy, 4, 0, Math.PI * 2);
+      ctx.arc(bx, by, dotR, 0, Math.PI * 2);
       ctx.fillStyle = dotGrad;
       ctx.fill();
     }
@@ -4029,10 +4034,18 @@ function _renderMindsGraph() {
         const elapsed = time.now - flashEntry.startAt;
         if (elapsed >= 0 && elapsed < FLASH_DURATION) {
           const fade = Math.max(0, 1 - elapsed / FLASH_DURATION);
-          const ringR = rr + 3 + (1 - fade) * 8;
+          const expandR = rr + 4 + (1 - fade) * 10;
+          const glowGrad = ctx.createRadialGradient(n.x, n.y, rr, n.x, n.y, expandR);
+          glowGrad.addColorStop(0, `rgba(${cr},${cg},${cb},${fade * 0.4})`);
+          glowGrad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
           ctx.beginPath();
-          ctx.arc(n.x, n.y, ringR, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255,255,255,${fade * 0.5})`;
+          ctx.arc(n.x, n.y, expandR, 0, Math.PI * 2);
+          ctx.fillStyle = glowGrad;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, rr + 2 + (1 - fade) * 4, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${cr},${cg},${cb},${fade * 0.7})`;
           ctx.lineWidth = 1.5;
           ctx.stroke();
         }
