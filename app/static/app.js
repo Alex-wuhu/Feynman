@@ -3708,6 +3708,43 @@ function _renderMindsGraph() {
       ctx.stroke();
     }
 
+    for (let fi = _flashLinks.length - 1; fi >= 0; fi--) {
+      const fl = _flashLinks[fi];
+      const elapsed = time.now - fl.startAt;
+      if (elapsed < 0) continue;
+      if (elapsed >= FLASH_DURATION) { _flashLinks.splice(fi, 1); continue; }
+      const s = fl.link.source, t = fl.link.target;
+      if (!s || !t || s.x == null || t.x == null) continue;
+      const progress = elapsed / FLASH_DURATION;
+      const intensity = progress < 0.2
+        ? progress / 0.2
+        : Math.max(0, 1 - (progress - 0.2) / 0.8);
+
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(t.x, t.y);
+      ctx.strokeStyle = `rgba(100,200,255,${intensity * 0.7})`;
+      ctx.lineWidth = 1.5 + intensity * 2;
+      ctx.stroke();
+
+      const pulseT = (elapsed * 0.002) % 1;
+      const bx = s.x + (t.x - s.x) * pulseT;
+      const by = s.y + (t.y - s.y) * pulseT;
+      const pulseGrad = ctx.createRadialGradient(bx, by, 0, bx, by, 8 + intensity * 6);
+      pulseGrad.addColorStop(0, `rgba(180,230,255,${intensity * 0.9})`);
+      pulseGrad.addColorStop(0.5, `rgba(100,200,255,${intensity * 0.4})`);
+      pulseGrad.addColorStop(1, 'rgba(100,200,255,0)');
+      ctx.beginPath();
+      ctx.arc(bx, by, 8 + intensity * 6, 0, Math.PI * 2);
+      ctx.fillStyle = pulseGrad;
+      ctx.fill();
+    }
+
+    for (let fi = _flashNodes.length - 1; fi >= 0; fi--) {
+      const elapsed = time.now - _flashNodes[fi].startAt;
+      if (elapsed >= FLASH_DURATION) _flashNodes.splice(fi, 1);
+    }
+
     for (const p of particles) {
       p.t += p.speed;
       if (p.t > 1) p.t -= 1;
@@ -3893,6 +3930,35 @@ function _renderMindsGraph() {
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
+      }
+
+      const flashEntry = _flashNodes.find(f => f.node === n);
+      if (flashEntry) {
+        const elapsed = time.now - flashEntry.startAt;
+        if (elapsed >= 0 && elapsed < FLASH_DURATION) {
+          const progress = elapsed / FLASH_DURATION;
+          const intensity = progress < 0.15
+            ? progress / 0.15
+            : Math.max(0, 1 - (progress - 0.15) / 0.85);
+          const flicker = 0.7 + 0.3 * Math.sin(elapsed * 0.025);
+          const alpha = intensity * flicker;
+
+          const flashR = rr + 6 + intensity * 14;
+          const flashGrad = ctx.createRadialGradient(n.x, n.y, rr * 0.3, n.x, n.y, flashR);
+          flashGrad.addColorStop(0, `rgba(100,200,255,${alpha * 0.5})`);
+          flashGrad.addColorStop(0.4, `rgba(60,160,255,${alpha * 0.25})`);
+          flashGrad.addColorStop(1, 'rgba(60,160,255,0)');
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, flashR, 0, Math.PI * 2);
+          ctx.fillStyle = flashGrad;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, rr + 3 + intensity * 5, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(100,200,255,${alpha * 0.9})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
       }
 
       ctx.beginPath();
@@ -4345,12 +4411,52 @@ function _renderMindsGraph() {
               sim.alpha(0.3).restart();
               _saveCustomLink(dragged.id, dropTarget.id);
               showToast(`Connected ${dragged.name} ↔ ${dropTarget.name}`);
+              _triggerConnectFlash(dragged, dropTarget, nl);
             }
           }
         }
         _dragStartPos = null;
       })
   );
+
+  const _flashNodes = [];
+  const _flashLinks = [];
+  const FLASH_DURATION = 2000;
+  const FLASH_CASCADE_DELAY = 150;
+
+  function _triggerConnectFlash(nodeA, nodeB, newLink) {
+    const t0 = performance.now();
+    _flashNodes.push({ node: nodeA, startAt: t0 });
+    _flashNodes.push({ node: nodeB, startAt: t0 });
+    _flashLinks.push({ link: newLink, startAt: t0 });
+
+    const visited = new Set([nodeA.id, nodeB.id]);
+    let frontier = [nodeB];
+    let wave = 1;
+    while (wave <= 3 && frontier.length > 0) {
+      const nextFrontier = [];
+      for (const fn of frontier) {
+        for (const l of links) {
+          if (l === newLink) continue;
+          const s = typeof l.source === 'object' ? l.source : null;
+          const t = typeof l.target === 'object' ? l.target : null;
+          if (!s || !t) continue;
+          let neighbor = null;
+          if (s.id === fn.id && !visited.has(t.id)) neighbor = t;
+          else if (t.id === fn.id && !visited.has(s.id)) neighbor = s;
+          if (neighbor) {
+            visited.add(neighbor.id);
+            const delay = wave * FLASH_CASCADE_DELAY;
+            _flashNodes.push({ node: neighbor, startAt: t0 + delay });
+            _flashLinks.push({ link: l, startAt: t0 + delay });
+            nextFrontier.push(neighbor);
+          }
+        }
+      }
+      frontier = nextFrontier;
+      wave++;
+    }
+  }
 
   function _saveCustomLink(sourceId, targetId) {
     try {
