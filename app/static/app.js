@@ -3620,6 +3620,8 @@ function _renderMindsGraph() {
   let transform = d3.zoomIdentity;
   let _isOnNode = false;
   let _isDraggingNode = false;
+  let _draggedNode = null;
+  let _dragStartPos = null;
   const zoomBehavior = d3.zoom()
     .scaleExtent([0.1, 6])
     .filter((e) => {
@@ -3631,6 +3633,89 @@ function _renderMindsGraph() {
     })
     .on('zoom', (e) => { transform = e.transform; });
   d3.select(canvas).call(zoomBehavior);
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+    const [wx, wy] = transform.invert([cx, cy]);
+    const hit = nodes.find(d => {
+      if (d._isAdd) return false;
+      const dx = wx - d.x, dy = wy - d.y;
+      return dx * dx + dy * dy < (BASE_R + 8) * (BASE_R + 8);
+    });
+    if (hit) {
+      _isDraggingNode = true;
+      _draggedNode = hit;
+      _dragStartPos = { x: hit.x, y: hit.y };
+      hit.fx = hit.x;
+      hit.fy = hit.y;
+      sim.alphaTarget(0.3).restart();
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!_draggedNode) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
+    const [wx, wy] = transform.invert([cx, cy]);
+    _draggedNode.fx = wx;
+    _draggedNode.fy = wy;
+
+    state._dragDropTarget = null;
+    let closest = null, closestDist = Infinity;
+    for (const n of nodes) {
+      if (n === _draggedNode || n._isAdd) continue;
+      const dx = n.x - wx, dy = n.y - wy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < BASE_R * 3.5 && dist < closestDist) {
+        closestDist = dist;
+        closest = n;
+      }
+    }
+    state._dragDropTarget = closest;
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!_draggedNode) return;
+    const dragged = _draggedNode;
+    const dropTarget = state._dragDropTarget;
+    state._dragDropTarget = null;
+
+    if (dropTarget && _dragStartPos) {
+      const alreadyLinked = links.some(l => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        return (sid === dragged.id && tid === dropTarget.id) ||
+               (sid === dropTarget.id && tid === dragged.id);
+      });
+      if (!alreadyLinked) {
+        const nl = { source: dragged, target: dropTarget, strength: 1 };
+        links.push(nl);
+        particles.push({ link: nl, t: Math.random(), speed: 0.001 + Math.random() * 0.003, size: 1.5, opacity: 0.4 });
+        sim.force('link').links(links);
+        sim.alpha(0.3).restart();
+        _saveCustomLink(dragged.id, dropTarget.id);
+        showToast(`Connected ${dragged.name} ↔ ${dropTarget.name}`);
+        _triggerConnectFlash(dragged, dropTarget, nl);
+      } else {
+        _triggerConnectFlash(dragged, dropTarget, links.find(l => {
+          const sid = typeof l.source === 'object' ? l.source.id : l.source;
+          const tid = typeof l.target === 'object' ? l.target.id : l.target;
+          return (sid === dragged.id && tid === dropTarget.id) ||
+                 (sid === dropTarget.id && tid === dragged.id);
+        }));
+      }
+    }
+
+    dragged.fx = null;
+    dragged.fy = null;
+    _draggedNode = null;
+    _isDraggingNode = false;
+    _dragStartPos = null;
+    sim.alphaTarget(0);
+  });
 
   const particles = [];
   links.forEach(l => {
@@ -4372,94 +4457,6 @@ function _renderMindsGraph() {
     state.hoveredNode = null;
     _hideTooltip();
   });
-
-  let _dragStartPos = null;
-
-  function _screenToWorld(e) {
-    const rect = canvas.getBoundingClientRect();
-    const sx = e.sourceEvent.clientX - rect.left;
-    const sy = e.sourceEvent.clientY - rect.top;
-    return transform.invert([sx, sy]);
-  }
-
-  d3.select(canvas).call(
-    d3.drag()
-      .subject((e) => {
-        const [mx, my] = transform.invert([e.x, e.y]);
-        const n = nodes.find(d => {
-          const dx = mx - d.x, dy = my - d.y;
-          return dx * dx + dy * dy < (BASE_R + 5) * (BASE_R + 5);
-        });
-        return n || null;
-      })
-      .on('start', (e) => {
-        if (!e.subject) return;
-        _isDraggingNode = true;
-        if (!e.active) sim.alphaTarget(0.3).restart();
-        _dragStartPos = { x: e.subject.x, y: e.subject.y };
-        e.subject.fx = e.subject.x;
-        e.subject.fy = e.subject.y;
-      })
-      .on('drag', (e) => {
-        if (!e.subject) return;
-        const [mx, my] = _screenToWorld(e);
-        e.subject.fx = mx;
-        e.subject.fy = my;
-
-        state._dragDropTarget = null;
-        if (!e.subject._isAdd) {
-          let closest = null, closestDist = Infinity;
-          for (const n of nodes) {
-            if (n === e.subject || n._isAdd) continue;
-            const dx = n.x - mx, dy = n.y - my;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < BASE_R * 3 && dist < closestDist) {
-              closestDist = dist;
-              closest = n;
-            }
-          }
-          state._dragDropTarget = closest;
-        }
-      })
-      .on('end', (e) => {
-        if (!e.subject) return;
-        _isDraggingNode = false;
-        if (!e.active) sim.alphaTarget(0);
-        const dragged = e.subject;
-        const dropTarget = state._dragDropTarget;
-        state._dragDropTarget = null;
-
-        if (dropTarget && !dragged._isAdd && _dragStartPos) {
-          const alreadyLinked = links.some(l => {
-            const sid = typeof l.source === 'object' ? l.source.id : l.source;
-            const tid = typeof l.target === 'object' ? l.target.id : l.target;
-            return (sid === dragged.id && tid === dropTarget.id) ||
-                   (sid === dropTarget.id && tid === dragged.id);
-          });
-          if (!alreadyLinked) {
-            const nl = { source: dragged, target: dropTarget, strength: 1 };
-            links.push(nl);
-            particles.push({ link: nl, t: Math.random(), speed: 0.001 + Math.random() * 0.003, size: 1.5, opacity: 0.4 });
-            sim.force('link').links(links);
-            sim.alpha(0.3).restart();
-            _saveCustomLink(dragged.id, dropTarget.id);
-            showToast(`Connected ${dragged.name} ↔ ${dropTarget.name}`);
-            _triggerConnectFlash(dragged, dropTarget, nl);
-          } else {
-            _triggerConnectFlash(dragged, dropTarget, links.find(l => {
-              const sid = typeof l.source === 'object' ? l.source.id : l.source;
-              const tid = typeof l.target === 'object' ? l.target.id : l.target;
-              return (sid === dragged.id && tid === dropTarget.id) ||
-                     (sid === dropTarget.id && tid === dragged.id);
-            }));
-          }
-        }
-
-        e.subject.fx = null;
-        e.subject.fy = null;
-        _dragStartPos = null;
-      })
-  );
 
   function _saveCustomLink(sourceId, targetId) {
     try {
