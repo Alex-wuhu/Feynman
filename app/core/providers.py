@@ -36,30 +36,15 @@ class BaseProvider:
     def supports_embeddings(self) -> bool:
         return False
 
-    def embed_texts(
-        self, texts: list[str], task_type: str | None = None
-    ) -> list[list[float]]:
+    def embed_texts(self, texts: list[str], task_type: str | None = None) -> list[list[float]]:
         raise NotImplementedError
 
-    def chat(
-        self,
-        system: str,
-        user: str,
-        history: list[dict[str, str]] | None = None,
-        use_grounding: bool = False,
-    ) -> ChatResult:
+    def chat(self, system: str, user: str, history: list[dict[str, str]] | None = None, use_grounding: bool = False) -> ChatResult:
         raise NotImplementedError
 
 
 class OpenAICompatibleProvider(BaseProvider):
-    def __init__(
-        self,
-        name: str,
-        api_key: str,
-        base_url: str,
-        chat_model: str,
-        embed_model: str | None = None,
-    ):
+    def __init__(self, name: str, api_key: str, base_url: str, chat_model: str, embed_model: str | None = None):
         self.name = name
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
@@ -86,13 +71,9 @@ class OpenAICompatibleProvider(BaseProvider):
             raise ProviderError(f"{self.name} error {resp.status_code}: {resp.text}")
         return resp.json()
 
-    def embed_texts(
-        self, texts: list[str], task_type: str | None = None
-    ) -> list[list[float]]:
+    def embed_texts(self, texts: list[str], task_type: str | None = None) -> list[list[float]]:
         if not self.embed_model:
-            raise ProviderError(
-                f"{self.name} does not support embeddings (missing model)"
-            )
+            raise ProviderError(f"{self.name} does not support embeddings (missing model)")
         payload = {
             "model": self.embed_model,
             "input": texts,
@@ -100,13 +81,7 @@ class OpenAICompatibleProvider(BaseProvider):
         data = self._post("/embeddings", payload)
         return [item["embedding"] for item in data.get("data", [])]
 
-    def chat(
-        self,
-        system: str,
-        user: str,
-        history: list[dict[str, str]] | None = None,
-        use_grounding: bool = False,
-    ) -> ChatResult:
+    def chat(self, system: str, user: str, history: list[dict[str, str]] | None = None, use_grounding: bool = False) -> ChatResult:
         messages: list[dict[str, str]] = []
         if system:
             messages.append({"role": "system", "content": system})
@@ -160,9 +135,7 @@ class GeminiProvider(BaseProvider):
             raise ProviderError(f"Gemini error {resp.status_code}: {resp.text}")
         return resp.json()
 
-    def embed_texts(
-        self, texts: list[str], task_type: str | None = None
-    ) -> list[list[float]]:
+    def embed_texts(self, texts: list[str], task_type: str | None = None) -> list[list[float]]:
         task_type = task_type or "RETRIEVAL_DOCUMENT"
         path = f"/models/{self.embed_model}:batchEmbedContents"
         requests = [
@@ -180,13 +153,7 @@ class GeminiProvider(BaseProvider):
             embeddings.append(item.get("values", []))
         return embeddings
 
-    def chat(
-        self,
-        system: str,
-        user: str,
-        history: list[dict[str, str]] | None = None,
-        use_grounding: bool = False,
-    ) -> ChatResult:
+    def chat(self, system: str, user: str, history: list[dict[str, str]] | None = None, use_grounding: bool = False) -> ChatResult:
         parts: list[dict[str, str]] = []
         prompt = system.strip()
         if prompt:
@@ -219,12 +186,10 @@ class GeminiProvider(BaseProvider):
             for chunk in grounding_meta.get("groundingChunks", []):
                 web = chunk.get("web", {})
                 if web.get("uri"):
-                    grounding.append(
-                        {
-                            "title": web.get("title", ""),
-                            "url": web["uri"],
-                        }
-                    )
+                    grounding.append({
+                        "title": web.get("title", ""),
+                        "url": web["uri"],
+                    })
 
         usage = None
         usage_meta = data.get("usageMetadata")
@@ -288,13 +253,7 @@ class AnthropicProvider(BaseProvider):
     def has_key(self) -> bool:
         return bool(self.api_key)
 
-    def chat(
-        self,
-        system: str,
-        user: str,
-        history: list[dict[str, str]] | None = None,
-        use_grounding: bool = False,
-    ) -> ChatResult:
+    def chat(self, system: str, user: str, history: list[dict[str, str]] | None = None, use_grounding: bool = False) -> ChatResult:
         messages: list[dict[str, Any]] = []
         if history:
             messages.extend(history)
@@ -312,9 +271,7 @@ class AnthropicProvider(BaseProvider):
             "Content-Type": "application/json",
         }
         with httpx.Client(timeout=60) as client:
-            resp = client.post(
-                f"{self.base_url}/v1/messages", headers=headers, json=payload
-            )
+            resp = client.post(f"{self.base_url}/v1/messages", headers=headers, json=payload)
         if resp.status_code >= 400:
             raise ProviderError(f"anthropic error {resp.status_code}: {resp.text}")
         data = resp.json()
@@ -355,10 +312,10 @@ def get_provider(name: str) -> BaseProvider:
         return _gemini_provider()
     if name == "kimi":
         return _kimi_provider()
-    if name == "novita":
-        return _novita_provider()
     if name == "deepseek":
         return _deepseek_provider()
+    if name == "novita":
+        return _novita_provider()
     if name == "anthropic":
         return _anthropic_provider()
     raise ProviderError(f"Unknown provider: {name}")
