@@ -3759,14 +3759,6 @@ function _renderMindsGraph(vectorLinks, layoutPositions) {
   const H = container.clientHeight || 600;
   const BASE_R = Math.max(20, Math.min(30, W / (nodes.length * 2)));
 
-  // Seed initial positions from PCA layout so simulation starts near final state
-  for (const n of nodes) {
-    if (n._isAdd) continue;
-    if (n._layoutPos) {
-      n.x = n._layoutPos.rx * W + (Math.random() - 0.5) * 80;
-      n.y = n._layoutPos.ry * H + (Math.random() - 0.5) * 80;
-    }
-  }
 
   const canvas = document.createElement('canvas');
   canvas.width = W * dpr;
@@ -3909,14 +3901,14 @@ function _renderMindsGraph(vectorLinks, layoutPositions) {
   _graphState = state;
 
   const linkForce = d3.forceLink(links).id(d => d.id)
-    .distance(d => Math.max(100, 300 - d.strength * 60))
-    .strength(d => 0.04 + d.strength * 0.08);
+    .distance(d => Math.max(80, 280 - d.strength * 70))
+    .strength(d => 0.08 + d.strength * 0.15);
 
   const sim = d3.forceSimulation(nodes)
     .force('link', linkForce)
-    .force('charge', d3.forceManyBody().strength(-900).distanceMax(600))
-    .force('embedding', _makeEmbeddingForce(0.20, W, H))
-    .force('collision', d3.forceCollide().radius(d => d._isAdd ? ADD_R + 15 : BASE_R + 15))
+    .force('charge', d3.forceManyBody().strength(-600).distanceMax(800))
+    .force('embedding', _makeEmbeddingForce(0.04, W, H))
+    .force('collision', d3.forceCollide().radius(d => d._isAdd ? ADD_R + 15 : BASE_R + 20))
     .alphaDecay(0.015);
   _graphSim = sim;
 
