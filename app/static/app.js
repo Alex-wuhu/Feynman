@@ -3547,6 +3547,7 @@ async function loadMinds() {
 let _graphSim = null;
 let _graphAnim = null;
 let _graphState = null;
+let _graphResizeObserver = null;
 
 function _domainTokens(m) {
   return (m.domain || '').toLowerCase().split(/[,;\/&]+/).map(d => d.trim()).filter(Boolean);
@@ -3745,6 +3746,7 @@ function _renderMindsGraph(vectorLinks, layoutPositions) {
 
   if (_graphAnim) { cancelAnimationFrame(_graphAnim); _graphAnim = null; }
   if (_graphSim) { _graphSim.stop(); _graphSim = null; }
+  if (_graphResizeObserver) { _graphResizeObserver.disconnect(); _graphResizeObserver = null; }
   container.innerHTML = '';
   tooltip.classList.add('hidden');
 
@@ -3755,8 +3757,8 @@ function _renderMindsGraph(vectorLinks, layoutPositions) {
 
   const { nodes, links, pendingNew } = _buildGraphData(allMinds, vectorLinks, layoutPositions);
   const dpr = window.devicePixelRatio || 1;
-  const W = container.clientWidth || 900;
-  const H = container.clientHeight || 600;
+  let W = container.clientWidth || 900;
+  let H = container.clientHeight || 600;
   const BASE_R = Math.max(20, Math.min(30, W / (nodes.length * 2)));
 
 
@@ -3768,6 +3770,21 @@ function _renderMindsGraph(vectorLinks, layoutPositions) {
   container.appendChild(canvas);
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
+
+  _graphResizeObserver = new ResizeObserver(() => {
+    const newW = container.clientWidth || 900;
+    const newH = container.clientHeight || 600;
+    if (newW === W && newH === H) return;
+    W = newW;
+    H = newH;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  });
+  _graphResizeObserver.observe(container);
 
   let transform = d3.zoomIdentity;
   let _isOnNode = false;
