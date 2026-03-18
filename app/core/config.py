@@ -48,7 +48,7 @@ ANTHROPIC_CHAT_MODEL = os.getenv("ANTHROPIC_CHAT_MODEL", "claude-sonnet-4-5-2025
 NOVITA_API_KEY = os.getenv("NOVITA_API_KEY", "").strip()
 NOVITA_BASE_URL = os.getenv("NOVITA_BASE_URL", "https://api.novita.ai/openai").strip()
 NOVITA_CHAT_MODEL = os.getenv("NOVITA_CHAT_MODEL", "deepseek/deepseek-v3.2").strip()
-NOVITA_EMBED_MODEL = os.getenv("NOVITA_EMBED_MODEL", "").strip()
+NOVITA_EMBED_MODEL = os.getenv("NOVITA_EMBED_MODEL", "qwen/qwen3-embedding-0.6b").strip()
 
 MAX_CHUNK_CHARS = int(os.getenv("MAX_CHUNK_CHARS", "1200"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "120"))
